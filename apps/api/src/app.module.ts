@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { RolesModule } from './roles/roles.module.js';
 import { validateEnvironment } from './config/env.validation.js';
 import { EmployeesModule } from './employees/employees.module.js';
+import { CareerEventsModule } from './career-events/career-events.module.js';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { EmployeesModule } from './employees/employees.module.js';
     AuthModule,
     RolesModule,
     EmployeesModule,
+    CareerEventsModule,
   ],
 
   controllers: [HealthController],

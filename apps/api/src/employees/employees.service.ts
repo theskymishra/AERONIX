@@ -4,23 +4,22 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { CareerEventsService } from '../career-events/career-events.service.js';
+import {
+  CareerEventType,
+} from '../career-events/schemas/career-event.schema.js';
 import {
   Model,
   Types,
 } from 'mongoose';
-
 import { User } from '../users/schemas/user.schema.js';
-
 import { CreateEmployeeDto } from './dto/create-employee.dto.js';
-
 import {
   EmployeeQueryDto,
 } from './dto/employee-query.dto.js';
-
 import {
   UpdateEmployeeDto,
 } from './dto/update-employee.dto.js';
-
 import { Employee } from './schemas/employee.schema.js';
 
 @Injectable()
@@ -31,11 +30,14 @@ export class EmployeesService {
 
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
+
+    private readonly careerEventsService: CareerEventsService,
   ) {}
 
   async create(
     organizationId: string,
     dto: CreateEmployeeDto,
+    createdBy: string,
   ) {
     const organizationObjectId =
       this.toObjectId(organizationId);
@@ -104,7 +106,8 @@ export class EmployeesService {
           organizationId:
             organizationObjectId,
 
-          userId: userObjectId,
+          userId:
+            userObjectId,
 
           employeeCode:
             dto.employeeCode.trim(),
@@ -169,6 +172,24 @@ export class EmployeesService {
             dto.designation?.trim(),
         });
 
+      await this.careerEventsService.create(
+        organizationId,
+        employee._id.toString(),
+        createdBy,
+        {
+          type: CareerEventType.JOINED,
+          title: 'Joined the organization',
+          effectiveDate:
+            employee.joiningDate,
+          metadata: {
+            employeeCode:
+              employee.employeeCode,
+            employmentType:
+              employee.employmentType,
+          },
+        },
+      );
+
       return employee;
     } catch (error) {
       if (
@@ -195,7 +216,8 @@ export class EmployeesService {
     const skip = (page - 1) * limit;
 
     const filter: Record<string, any> = {
-      organizationId: organizationObjectId,
+      organizationId:
+        organizationObjectId,
     };
 
     if (query.employmentStatus) {

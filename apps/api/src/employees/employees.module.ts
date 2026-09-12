@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthModule } from '../auth/auth.module.js';
 import { RolesModule } from '../roles/roles.module.js';
+import { CareerEventsModule } from '../career-events/career-events.module.js';
 
 import {
   User,
@@ -30,6 +31,7 @@ import {
   imports: [
     AuthModule,
     RolesModule,
+    CareerEventsModule,
 
     MongooseModule.forFeature([
       {

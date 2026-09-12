@@ -79,6 +79,7 @@ export class EmployeesController {
     return this.employeesService.create(
       user.organizationId,
       dto,
+      user.userId,
     );
   }
 
