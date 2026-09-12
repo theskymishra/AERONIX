@@ -1,13 +1,20 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+
 import { HealthController } from './health/health.controller.js';
+import { OrganizationsModule } from './organizations/organizations.module.js';
+import { UsersModule } from './users/users.module.js';
+import { AuthModule } from './auth/auth.module.js';
+import { validateEnvironment } from './config/env.validation.js';
+
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validate: validateEnvironment,
     }),
 
     MongooseModule.forRootAsync({
@@ -17,7 +24,12 @@ import { HealthController } from './health/health.controller.js';
         uri: configService.getOrThrow<string>('MONGODB_URI'),
       }),
     }),
+
+    OrganizationsModule,
+    UsersModule,
+    AuthModule,
   ],
+
   controllers: [HealthController],
 })
 export class AppModule {}
