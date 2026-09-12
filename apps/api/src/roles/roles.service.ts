@@ -104,5 +104,46 @@ export class RolesService {
     user.roleId = role._id;
     await user.save();
   }
+    async getUserPermissions(
+    userId: string,
+    organizationId: string,
+  ): Promise<string[]> {
+    const user = await this.userModel
+      .findOne({
+        _id: new Types.ObjectId(userId),
+        organizationId:
+          new Types.ObjectId(organizationId),
+      })
+      .select('roleId')
+      .lean()
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException(
+        'User not found',
+      );
+    }
+
+    if (!user.roleId) {
+      return [];
+    }
+
+    const role = await this.roleModel
+      .findOne({
+        _id: user.roleId,
+        organizationId:
+          new Types.ObjectId(organizationId),
+        isActive: true,
+      })
+      .select('permissions')
+      .lean()
+      .exec();
+
+    if (!role) {
+      return [];
+    }
+
+    return [...role.permissions];
+  }
 }
 
