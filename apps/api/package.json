@@ -12,6 +12,8 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start ",
     "start:dev": "nest start --watch",
+    "seed:roles": "node dist/roles/seed.js",
+    "assign:test-user-role": "node dist/roles/assign-test-user-role.js",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "oxlint src/ test/",
