@@ -116,7 +116,21 @@ export class EmployeesController {
       employeeId,
     );
   }
-
+    @Get(':id/360')
+  @RequirePermissions(
+    PERMISSIONS.EMPLOYEE_READ,
+  )
+  find360(
+    @CurrentUser()
+    user: AuthenticatedUser,
+    @Param('id')
+    employeeId: string,
+  ) {
+    return this.employeesService.find360(
+      user.organizationId,
+      employeeId,
+    );
+  }
   @Patch(':id')
   @RequirePermissions(
     PERMISSIONS.EMPLOYEE_UPDATE,

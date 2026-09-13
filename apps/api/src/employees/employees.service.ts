@@ -340,6 +340,91 @@ export class EmployeesService {
 
     return employee;
   }
+    async find360(
+    organizationId: string,
+    employeeId: string,
+  ) {
+    const organizationObjectId =
+      this.toObjectId(organizationId);
+
+    const employeeObjectId =
+      this.toObjectId(employeeId);
+
+    const employee =
+      await this.employeeModel
+        .findOne({
+          _id: employeeObjectId,
+          organizationId: organizationObjectId,
+        })
+        .lean()
+        .exec();
+
+    if (!employee) {
+      throw new NotFoundException(
+        'Employee not found',
+      );
+    }
+
+    const [user, manager, careerTimeline] =
+      await Promise.all([
+        this.userModel
+          .findOne({
+            _id: employee.userId,
+            organizationId: organizationObjectId,
+          })
+          .select(
+            'email firstName lastName status emailVerified roleId lastLoginAt',
+          )
+          .lean()
+          .exec(),
+
+        employee.managerId
+          ? this.employeeModel
+              .findOne({
+                _id: employee.managerId,
+                organizationId: organizationObjectId,
+              })
+              .select(
+                'employeeCode firstName middleName lastName workEmail jobTitle designation employmentStatus',
+              )
+              .lean()
+              .exec()
+          : null,
+
+        this.careerEventsService.findByEmployee(
+          organizationId,
+          employeeId,
+        ),
+      ]);
+
+    if (!user) {
+      throw new NotFoundException(
+        'Employee user not found in this organization',
+      );
+    }
+
+    return {
+      employee,
+      user,
+      organization: {
+        organizationId,
+      },
+      department: employee.departmentId
+        ? {
+            departmentId:
+              employee.departmentId.toString(),
+          }
+        : null,
+      team: employee.teamId
+        ? {
+            teamId:
+              employee.teamId.toString(),
+          }
+        : null,
+      manager,
+      careerTimeline,
+    };
+  }
 
   async update(
     organizationId: string,
