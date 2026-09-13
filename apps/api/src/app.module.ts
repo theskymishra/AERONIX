@@ -10,6 +10,7 @@ import { RolesModule } from './roles/roles.module.js';
 import { validateEnvironment } from './config/env.validation.js';
 import { EmployeesModule } from './employees/employees.module.js';
 import { CareerEventsModule } from './career-events/career-events.module.js';
+import { EmployeeDocumentsModule } from './employee-documents/employee-documents.module.js';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CareerEventsModule } from './career-events/career-events.module.js';
     RolesModule,
     EmployeesModule,
     CareerEventsModule,
+    EmployeeDocumentsModule,
   ],
 
   controllers: [HealthController],
