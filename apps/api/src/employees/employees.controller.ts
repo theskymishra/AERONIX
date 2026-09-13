@@ -131,6 +131,17 @@ export class EmployeesController {
       employeeId,
     );
   }
+  @Get(':id/career-timeline')
+  @RequirePermissions(PERMISSIONS.EMPLOYEE_READ)
+  findCareerTimeline(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') employeeId: string,
+  ) {
+  return this.employeesService.findCareerTimeline(
+      user.organizationId,
+      employeeId,
+    );
+  }
   @Patch(':id')
   @RequirePermissions(
     PERMISSIONS.EMPLOYEE_UPDATE,

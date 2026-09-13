@@ -425,6 +425,17 @@ export class EmployeesService {
       careerTimeline,
     };
   }
+  async findCareerTimeline(
+  organizationId: string,
+  employeeId: string,
+) {
+  await this.findOne(organizationId, employeeId);
+
+  return this.careerEventsService.findByEmployee(
+    organizationId,
+    employeeId,
+  );
+}
 
   async update(
     organizationId: string,
