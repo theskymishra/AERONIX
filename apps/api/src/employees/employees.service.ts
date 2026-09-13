@@ -178,12 +178,16 @@ export class EmployeesService {
         createdBy,
         {
           type: CareerEventType.JOINED,
+
           title: 'Joined the organization',
+
           effectiveDate:
             employee.joiningDate,
+
           metadata: {
             employeeCode:
               employee.employeeCode,
+
             employmentType:
               employee.employmentType,
           },
@@ -305,6 +309,7 @@ export class EmployeesService {
 
     return {
       data: employees,
+
       meta: {
         page,
         limit,
@@ -325,6 +330,7 @@ export class EmployeesService {
           _id: this.toObjectId(
             employeeId,
           ),
+
           organizationId:
             this.toObjectId(
               organizationId,
@@ -340,7 +346,8 @@ export class EmployeesService {
 
     return employee;
   }
-    async find360(
+
+  async find360(
     organizationId: string,
     employeeId: string,
   ) {
@@ -354,7 +361,8 @@ export class EmployeesService {
       await this.employeeModel
         .findOne({
           _id: employeeObjectId,
-          organizationId: organizationObjectId,
+          organizationId:
+            organizationObjectId,
         })
         .lean()
         .exec();
@@ -365,37 +373,42 @@ export class EmployeesService {
       );
     }
 
-    const [user, manager, careerTimeline] =
-      await Promise.all([
-        this.userModel
-          .findOne({
-            _id: employee.userId,
-            organizationId: organizationObjectId,
-          })
-          .select(
-            'email firstName lastName status emailVerified roleId lastLoginAt',
-          )
-          .lean()
-          .exec(),
+    const [
+      user,
+      manager,
+      careerTimeline,
+    ] = await Promise.all([
+      this.userModel
+        .findOne({
+          _id: employee.userId,
+          organizationId:
+            organizationObjectId,
+        })
+        .select(
+          'email firstName lastName status emailVerified roleId lastLoginAt',
+        )
+        .lean()
+        .exec(),
 
-        employee.managerId
-          ? this.employeeModel
-              .findOne({
-                _id: employee.managerId,
-                organizationId: organizationObjectId,
-              })
-              .select(
-                'employeeCode firstName middleName lastName workEmail jobTitle designation employmentStatus',
-              )
-              .lean()
-              .exec()
-          : null,
+      employee.managerId
+        ? this.employeeModel
+            .findOne({
+              _id: employee.managerId,
+              organizationId:
+                organizationObjectId,
+            })
+            .select(
+              'employeeCode firstName middleName lastName workEmail jobTitle designation employmentStatus',
+            )
+            .lean()
+            .exec()
+        : null,
 
-        this.careerEventsService.findByEmployee(
-          organizationId,
-          employeeId,
-        ),
-      ]);
+      this.careerEventsService.findByEmployee(
+        organizationId,
+        employeeId,
+      ),
+    ]);
 
     if (!user) {
       throw new NotFoundException(
@@ -405,42 +418,53 @@ export class EmployeesService {
 
     return {
       employee,
+
       user,
+
       organization: {
         organizationId,
       },
+
       department: employee.departmentId
         ? {
             departmentId:
               employee.departmentId.toString(),
           }
         : null,
+
       team: employee.teamId
         ? {
             teamId:
               employee.teamId.toString(),
           }
         : null,
+
       manager,
+
       careerTimeline,
     };
   }
-  async findCareerTimeline(
-  organizationId: string,
-  employeeId: string,
-) {
-  await this.findOne(organizationId, employeeId);
 
-  return this.careerEventsService.findByEmployee(
-    organizationId,
-    employeeId,
-  );
-}
+  async findCareerTimeline(
+    organizationId: string,
+    employeeId: string,
+  ) {
+    await this.findOne(
+      organizationId,
+      employeeId,
+    );
+
+    return this.careerEventsService.findByEmployee(
+      organizationId,
+      employeeId,
+    );
+  }
 
   async update(
     organizationId: string,
     employeeId: string,
     dto: UpdateEmployeeDto,
+    updatedBy: string,
   ) {
     const organizationObjectId =
       this.toObjectId(organizationId);
@@ -452,6 +476,7 @@ export class EmployeesService {
       await this.employeeModel
         .findOne({
           _id: employeeObjectId,
+
           organizationId:
             organizationObjectId,
         })
@@ -477,6 +502,32 @@ export class EmployeesService {
         );
       }
     }
+
+    const oldValues = {
+      designation:
+        employee.designation,
+
+      departmentId:
+        employee.departmentId?.toString(),
+
+      teamId:
+        employee.teamId?.toString(),
+
+      managerId:
+        employee.managerId?.toString(),
+
+      employmentType:
+        employee.employmentType,
+
+      location:
+        employee.location,
+
+      workMode:
+        employee.workMode,
+
+      employmentStatus:
+        employee.employmentStatus,
+    };
 
     const update: Record<
       string,
@@ -561,70 +612,268 @@ export class EmployeesService {
         dto.designation.trim();
     }
 
-    const updated =
-      await this.employeeModel
-        .findOneAndUpdate(
-          {
-            _id: employeeObjectId,
-            organizationId:
-              organizationObjectId,
-          },
-          {
-            $set: update,
-          },
-          {
-            new: true,
-            runValidators: true,
-          },
-        )
-        .exec();
+    try {
+      const updated =
+        await this.employeeModel
+          .findOneAndUpdate(
+            {
+              _id: employeeObjectId,
 
-    if (!updated) {
-      throw new NotFoundException(
-        'Employee not found',
-      );
+              organizationId:
+                organizationObjectId,
+            },
+            {
+              $set: update,
+            },
+            {
+              new: true,
+              runValidators: true,
+            },
+          )
+          .exec();
+
+      if (!updated) {
+        throw new NotFoundException(
+          'Employee not found',
+        );
+      }
+
+      const newValues = {
+        designation:
+          updated.designation,
+
+        departmentId:
+          updated.departmentId?.toString(),
+
+        teamId:
+          updated.teamId?.toString(),
+
+        managerId:
+          updated.managerId?.toString(),
+
+        employmentType:
+          updated.employmentType,
+
+        location:
+          updated.location,
+
+        workMode:
+          updated.workMode,
+
+        employmentStatus:
+          updated.employmentStatus,
+      };
+
+      const changes = [
+        {
+          type:
+            CareerEventType.DESIGNATION_CHANGE,
+          title:
+            'Designation changed',
+          oldValue:
+            oldValues.designation,
+          newValue:
+            newValues.designation,
+        },
+
+        {
+          type:
+            CareerEventType.DEPARTMENT_CHANGE,
+          title:
+            'Department changed',
+          oldValue:
+            oldValues.departmentId,
+          newValue:
+            newValues.departmentId,
+        },
+
+        {
+          type:
+            CareerEventType.TEAM_CHANGE,
+          title:
+            'Team changed',
+          oldValue:
+            oldValues.teamId,
+          newValue:
+            newValues.teamId,
+        },
+
+        {
+          type:
+            CareerEventType.MANAGER_CHANGE,
+          title:
+            'Manager changed',
+          oldValue:
+            oldValues.managerId,
+          newValue:
+            newValues.managerId,
+        },
+
+        {
+          type:
+            CareerEventType.EMPLOYMENT_TYPE_CHANGE,
+          title:
+            'Employment type changed',
+          oldValue:
+            oldValues.employmentType,
+          newValue:
+            newValues.employmentType,
+        },
+
+        {
+          type:
+            CareerEventType.LOCATION_CHANGE,
+          title:
+            'Location changed',
+          oldValue:
+            oldValues.location,
+          newValue:
+            newValues.location,
+        },
+
+        {
+          type:
+            CareerEventType.WORK_MODE_CHANGE,
+          title:
+            'Work mode changed',
+          oldValue:
+            oldValues.workMode,
+          newValue:
+            newValues.workMode,
+        },
+
+        {
+          type:
+            CareerEventType.STATUS_CHANGE,
+          title:
+            'Employment status changed',
+          oldValue:
+            oldValues.employmentStatus,
+          newValue:
+            newValues.employmentStatus,
+        },
+      ];
+
+      for (const change of changes) {
+        if (
+          this.valuesAreDifferent(
+            change.oldValue,
+            change.newValue,
+          )
+        ) {
+          await this.careerEventsService.recordChange(
+            organizationId,
+            employeeId,
+            updatedBy,
+            {
+              type: change.type,
+              title: change.title,
+              oldValue:
+                change.oldValue,
+              newValue:
+                change.newValue,
+              effectiveDate:
+                new Date(),
+            },
+          );
+        }
+      }
+
+      return updated;
+    } catch (error) {
+      if (
+        this.isDuplicateKeyError(error)
+      ) {
+        throw new ConflictException(
+          'An employee with the same unique identifier already exists',
+        );
+      }
+
+      throw error;
     }
-
-    return updated;
   }
 
   async deactivate(
-    organizationId: string,
-    employeeId: string,
-  ) {
-    const employee =
-      await this.employeeModel
-        .findOneAndUpdate(
-          {
-            _id: this.toObjectId(
-              employeeId,
-            ),
-            organizationId:
-              this.toObjectId(
-                organizationId,
-              ),
-          },
-          {
-            $set: {
-              employmentStatus:
-                'TERMINATED',
-              exitDate: new Date(),
-            },
-          },
-          {
-            new: true,
-          },
-        )
-        .exec();
+  organizationId: string,
+  employeeId: string,
+  updatedBy: string,
+) {
+  const organizationObjectId =
+    this.toObjectId(organizationId);
 
-    if (!employee) {
-      throw new NotFoundException(
-        'Employee not found',
-      );
-    }
+  const employeeObjectId =
+    this.toObjectId(employeeId);
 
-    return employee;
+  const existingEmployee =
+    await this.employeeModel
+      .findOne({
+        _id: employeeObjectId,
+        organizationId: organizationObjectId,
+      })
+      .exec();
+
+  if (!existingEmployee) {
+    throw new NotFoundException(
+      'Employee not found',
+    );
   }
+
+  // Already terminated — do not create another EXITED event.
+  if (existingEmployee.employmentStatus === 'TERMINATED') {
+    return existingEmployee;
+  }
+
+  const exitDate = new Date();
+
+  const employee =
+    await this.employeeModel
+      .findOneAndUpdate(
+        {
+          _id: employeeObjectId,
+          organizationId: organizationObjectId,
+        },
+        {
+          $set: {
+            employmentStatus: 'TERMINATED',
+            exitDate,
+          },
+        },
+        {
+          new: true,
+        },
+      )
+      .exec();
+
+  if (!employee) {
+    throw new NotFoundException(
+      'Employee not found',
+    );
+  }
+
+  await this.careerEventsService.create(
+    organizationId,
+    employeeId,
+    updatedBy,
+    {
+      type: CareerEventType.EXITED,
+
+      title:
+        'Exited the organization',
+
+      effectiveDate: exitDate,
+
+      metadata: {
+        previousStatus:
+          existingEmployee.employmentStatus,
+
+        newStatus:
+          employee.employmentStatus,
+      },
+    },
+  );
+
+  return employee;
+}
 
   private async ensureManagerBelongsToOrganization(
     organizationId: Types.ObjectId,
@@ -636,6 +885,7 @@ export class EmployeesService {
           _id: this.toObjectId(
             managerId,
           ),
+
           organizationId,
         })
         .select('_id')
@@ -647,6 +897,16 @@ export class EmployeesService {
         'Manager not found in this organization',
       );
     }
+  }
+
+  private valuesAreDifferent(
+    oldValue: unknown,
+    newValue: unknown,
+  ): boolean {
+    return (
+      String(oldValue ?? '') !==
+      String(newValue ?? '')
+    );
   }
 
   private toObjectId(

@@ -48,6 +48,34 @@ export class CareerEventsService {
     return event;
   }
 
+  async recordChange(
+  organizationId: string,
+  employeeId: string,
+  createdBy: string,
+  data: {
+    type: CareerEventType;
+    title: string;
+    oldValue: unknown;
+    newValue: unknown;
+    effectiveDate: Date;
+  },
+): Promise<CareerEvent> {
+  return this.create(
+    organizationId,
+    employeeId,
+    createdBy,
+    {
+      type: data.type,
+      title: data.title,
+      effectiveDate: data.effectiveDate,
+      metadata: {
+        oldValue: data.oldValue,
+        newValue: data.newValue,
+      },
+    },
+  );
+}
+
   async findByEmployee(
     organizationId: string,
     employeeId: string,

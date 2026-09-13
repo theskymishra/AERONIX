@@ -160,6 +160,7 @@ export class EmployeesController {
       user.organizationId,
       employeeId,
       dto,
+      user.userId,
     );
   }
 
@@ -177,6 +178,7 @@ export class EmployeesController {
     return this.employeesService.deactivate(
       user.organizationId,
       employeeId,
+      user.userId,
     );
   }
 }
