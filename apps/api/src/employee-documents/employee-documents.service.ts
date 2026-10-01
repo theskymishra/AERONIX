@@ -1,19 +1,33 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { randomUUID } from 'node:crypto';
+
+import { STORAGE_SERVICE } from '../storage/storage.interface.js';
+import type { StorageService } from '../storage/storage.interface.js';
 
 import { Employee } from '../employees/schemas/employee.schema.js';
+
 import {
   EmployeeDocument,
   EmployeeDocumentStatus,
 } from './schemas/employee-document.schema.js';
+
 import { CreateEmployeeDocumentDto } from './dto/create-employee-document.dto.js';
 import { EmployeeDocumentQueryDto } from './dto/employee-document-query.dto.js';
+
+type UploadedDocumentFile = {
+  originalname: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+};
 
 @Injectable()
 export class EmployeeDocumentsService {
@@ -23,6 +37,9 @@ export class EmployeeDocumentsService {
 
     @InjectModel(Employee.name)
     private readonly employeeModel: Model<Employee>,
+
+    @Inject(STORAGE_SERVICE)
+    private readonly storageService: StorageService,
   ) {}
 
   async create(
@@ -30,35 +47,68 @@ export class EmployeeDocumentsService {
     employeeId: string,
     uploadedBy: string,
     dto: CreateEmployeeDocumentDto,
+    file?: UploadedDocumentFile,
   ) {
-    const organizationObjectId =
-      this.toObjectId(organizationId);
-
-    const employeeObjectId =
-      this.toObjectId(employeeId);
+    const organizationObjectId = this.toObjectId(organizationId);
+    const employeeObjectId = this.toObjectId(employeeId);
+    const uploadedByObjectId = this.toObjectId(uploadedBy);
 
     await this.ensureEmployeeBelongsToOrganization(
       organizationObjectId,
       employeeObjectId,
     );
 
+    if (!file) {
+      throw new BadRequestException(
+        'A document file is required',
+      );
+    }
+
+    this.validateFile(file);
+
+    const extension = this.getFileExtension(
+      file.originalname,
+    );
+
+    const storageKey = [
+      'employees',
+      employeeId,
+      `${randomUUID()}${extension}`,
+    ].join('/');
+
+    let storedFile = false;
+
     try {
+      await this.storageService.upload({
+        key: storageKey,
+        body: file.buffer,
+        contentType: file.mimetype,
+      });
+
+      storedFile = true;
+
       return await this.documentModel.create({
         organizationId: organizationObjectId,
         employeeId: employeeObjectId,
         name: dto.name.trim(),
         type: dto.type,
         description: dto.description?.trim(),
-        originalFileName:
-          dto.originalFileName?.trim(),
-        mimeType: dto.mimeType?.trim(),
-        fileSize: dto.fileSize,
-        storageKey: dto.storageKey?.trim(),
-        storageUrl: dto.storageUrl?.trim(),
+        originalFileName: file.originalname.trim(),
+        mimeType: file.mimetype,
+        fileSize: file.size,
+        storageKey,
         status: EmployeeDocumentStatus.ACTIVE,
-        uploadedBy: this.toObjectId(uploadedBy),
+        uploadedBy: uploadedByObjectId,
       });
     } catch (error) {
+      if (storedFile) {
+        try {
+          await this.storageService.delete(storageKey);
+        } catch {
+          // Preserve the original error if cleanup also fails.
+        }
+      }
+
       if (this.isDuplicateKeyError(error)) {
         throw new ConflictException(
           'A document with the same identifier already exists',
@@ -118,7 +168,9 @@ export class EmployeeDocumentsService {
         .lean()
         .exec(),
 
-      this.documentModel.countDocuments(filter).exec(),
+      this.documentModel
+        .countDocuments(filter)
+        .exec(),
     ]);
 
     return {
@@ -222,7 +274,67 @@ export class EmployeeDocumentsService {
     }
   }
 
-  private toObjectId(value: string): Types.ObjectId {
+  private validateFile(
+    file: UploadedDocumentFile,
+  ): void {
+    const allowedMimeTypes = new Set([
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ]);
+
+    if (!allowedMimeTypes.has(file.mimetype)) {
+      throw new BadRequestException(
+        'Unsupported file type. Allowed types: PDF, JPEG, PNG, WebP, DOCX, XLSX',
+      );
+    }
+
+    const maxFileSize = 10 * 1024 * 1024;
+
+    if (file.size <= 0) {
+      throw new BadRequestException(
+        'Uploaded file is empty',
+      );
+    }
+
+    if (file.size > maxFileSize) {
+      throw new BadRequestException(
+        'File size must not exceed 10 MB',
+      );
+    }
+  }
+
+  private getFileExtension(
+    fileName: string,
+  ): string {
+    const lastDotIndex =
+      fileName.lastIndexOf('.');
+
+    if (
+      lastDotIndex <= 0 ||
+      lastDotIndex === fileName.length - 1
+    ) {
+      return '';
+    }
+
+    const extension =
+      fileName
+        .slice(lastDotIndex)
+        .toLowerCase();
+
+    if (!/^\.[a-z0-9]+$/.test(extension)) {
+      return '';
+    }
+
+    return extension;
+  }
+
+  private toObjectId(
+    value: string,
+  ): Types.ObjectId {
     if (!Types.ObjectId.isValid(value)) {
       throw new BadRequestException(
         'Invalid identifier',
@@ -232,7 +344,9 @@ export class EmployeeDocumentsService {
     return new Types.ObjectId(value);
   }
 
-  private escapeRegex(value: string): string {
+  private escapeRegex(
+    value: string,
+  ): string {
     return value.replace(
       /[.*+?^${}()|[\]\\]/g,
       '\\$&',

@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module.js';
 import { RolesModule } from '../roles/roles.module.js';
 import { EmployeesModule } from '../employees/employees.module.js';
+import { StorageModule } from '../storage/storage.module.js';
 
 import { PermissionGuard } from '../permissions/permission.guard.js';
 
@@ -20,7 +21,7 @@ import {
     AuthModule,
     RolesModule,
     EmployeesModule,
-
+    StorageModule,
     MongooseModule.forFeature([
       {
         name: EmployeeDocument.name,
