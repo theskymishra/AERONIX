@@ -59,16 +59,12 @@ export class EmployeeDocumentsService {
     );
 
     if (!file) {
-      throw new BadRequestException(
-        'A document file is required',
-      );
+      throw new BadRequestException('A document file is required');
     }
 
     this.validateFile(file);
 
-    const extension = this.getFileExtension(
-      file.originalname,
-    );
+    const extension = this.getFileExtension(file.originalname);
 
     const storageKey = [
       'employees',
@@ -124,11 +120,9 @@ export class EmployeeDocumentsService {
     employeeId: string,
     query: EmployeeDocumentQueryDto,
   ) {
-    const organizationObjectId =
-      this.toObjectId(organizationId);
+    const organizationObjectId = this.toObjectId(organizationId);
 
-    const employeeObjectId =
-      this.toObjectId(employeeId);
+    const employeeObjectId = this.toObjectId(employeeId);
 
     await this.ensureEmployeeBelongsToOrganization(
       organizationObjectId,
@@ -168,9 +162,7 @@ export class EmployeeDocumentsService {
         .lean()
         .exec(),
 
-      this.documentModel
-        .countDocuments(filter)
-        .exec(),
+      this.documentModel.countDocuments(filter).exec(),
     ]);
 
     return {
@@ -189,25 +181,64 @@ export class EmployeeDocumentsService {
     employeeId: string,
     documentId: string,
   ) {
-    const document =
-      await this.documentModel
-        .findOne({
-          _id: this.toObjectId(documentId),
-          organizationId:
-            this.toObjectId(organizationId),
-          employeeId:
-            this.toObjectId(employeeId),
-        })
-        .lean()
-        .exec();
+    const document = await this.documentModel
+      .findOne({
+        _id: this.toObjectId(documentId),
+        organizationId: this.toObjectId(organizationId),
+        employeeId: this.toObjectId(employeeId),
+      })
+      .lean()
+      .exec();
 
     if (!document) {
-      throw new NotFoundException(
-        'Employee document not found',
-      );
+      throw new NotFoundException('Employee document not found');
     }
 
     return document;
+  }
+
+  async download(
+    organizationId: string,
+    employeeId: string,
+    documentId: string,
+  ) {
+    const organizationObjectId = this.toObjectId(organizationId);
+
+    const employeeObjectId = this.toObjectId(employeeId);
+
+    await this.ensureEmployeeBelongsToOrganization(
+      organizationObjectId,
+      employeeObjectId,
+    );
+
+    const document = await this.documentModel
+      .findOne({
+        _id: this.toObjectId(documentId),
+        organizationId: organizationObjectId,
+        employeeId: employeeObjectId,
+      })
+      .lean()
+      .exec();
+
+    if (!document) {
+      throw new NotFoundException('Employee document not found');
+    }
+
+    if (document.status === EmployeeDocumentStatus.ARCHIVED) {
+      throw new NotFoundException('Employee document not found');
+    }
+
+    if (!document.storageKey) {
+      throw new NotFoundException('Document file not found');
+    }
+
+    const storedFile = await this.storageService.get(document.storageKey);
+
+    return {
+      body: storedFile.body,
+      contentType: document.mimeType ?? 'application/octet-stream',
+      fileName: document.originalFileName ?? document.name,
+    };
   }
 
   async archive(
@@ -216,37 +247,27 @@ export class EmployeeDocumentsService {
     documentId: string,
     archivedBy: string,
   ) {
-    const document =
-      await this.documentModel
-        .findOne({
-          _id: this.toObjectId(documentId),
-          organizationId:
-            this.toObjectId(organizationId),
-          employeeId:
-            this.toObjectId(employeeId),
-        })
-        .exec();
+    const document = await this.documentModel
+      .findOne({
+        _id: this.toObjectId(documentId),
+        organizationId: this.toObjectId(organizationId),
+        employeeId: this.toObjectId(employeeId),
+      })
+      .exec();
 
     if (!document) {
-      throw new NotFoundException(
-        'Employee document not found',
-      );
+      throw new NotFoundException('Employee document not found');
     }
 
-    if (
-      document.status ===
-      EmployeeDocumentStatus.ARCHIVED
-    ) {
+    if (document.status === EmployeeDocumentStatus.ARCHIVED) {
       return document;
     }
 
-    document.status =
-      EmployeeDocumentStatus.ARCHIVED;
+    document.status = EmployeeDocumentStatus.ARCHIVED;
 
     document.archivedAt = new Date();
 
-    document.archivedBy =
-      this.toObjectId(archivedBy);
+    document.archivedBy = this.toObjectId(archivedBy);
 
     await document.save();
 
@@ -257,26 +278,21 @@ export class EmployeeDocumentsService {
     organizationId: Types.ObjectId,
     employeeId: Types.ObjectId,
   ) {
-    const employee =
-      await this.employeeModel
-        .findOne({
-          _id: employeeId,
-          organizationId,
-        })
-        .select('_id')
-        .lean()
-        .exec();
+    const employee = await this.employeeModel
+      .findOne({
+        _id: employeeId,
+        organizationId,
+      })
+      .select('_id')
+      .lean()
+      .exec();
 
     if (!employee) {
-      throw new NotFoundException(
-        'Employee not found',
-      );
+      throw new NotFoundException('Employee not found');
     }
   }
 
-  private validateFile(
-    file: UploadedDocumentFile,
-  ): void {
+  private validateFile(file: UploadedDocumentFile): void {
     const allowedMimeTypes = new Set([
       'application/pdf',
       'image/jpeg',
@@ -295,35 +311,22 @@ export class EmployeeDocumentsService {
     const maxFileSize = 10 * 1024 * 1024;
 
     if (file.size <= 0) {
-      throw new BadRequestException(
-        'Uploaded file is empty',
-      );
+      throw new BadRequestException('Uploaded file is empty');
     }
 
     if (file.size > maxFileSize) {
-      throw new BadRequestException(
-        'File size must not exceed 10 MB',
-      );
+      throw new BadRequestException('File size must not exceed 10 MB');
     }
   }
 
-  private getFileExtension(
-    fileName: string,
-  ): string {
-    const lastDotIndex =
-      fileName.lastIndexOf('.');
+  private getFileExtension(fileName: string): string {
+    const lastDotIndex = fileName.lastIndexOf('.');
 
-    if (
-      lastDotIndex <= 0 ||
-      lastDotIndex === fileName.length - 1
-    ) {
+    if (lastDotIndex <= 0 || lastDotIndex === fileName.length - 1) {
       return '';
     }
 
-    const extension =
-      fileName
-        .slice(lastDotIndex)
-        .toLowerCase();
+    const extension = fileName.slice(lastDotIndex).toLowerCase();
 
     if (!/^\.[a-z0-9]+$/.test(extension)) {
       return '';
@@ -332,30 +335,19 @@ export class EmployeeDocumentsService {
     return extension;
   }
 
-  private toObjectId(
-    value: string,
-  ): Types.ObjectId {
+  private toObjectId(value: string): Types.ObjectId {
     if (!Types.ObjectId.isValid(value)) {
-      throw new BadRequestException(
-        'Invalid identifier',
-      );
+      throw new BadRequestException('Invalid identifier');
     }
 
     return new Types.ObjectId(value);
   }
 
-  private escapeRegex(
-    value: string,
-  ): string {
-    return value.replace(
-      /[.*+?^${}()|[\]\\]/g,
-      '\\$&',
-    );
+  private escapeRegex(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  private isDuplicateKeyError(
-    error: unknown,
-  ): boolean {
+  private isDuplicateKeyError(error: unknown): boolean {
     return (
       typeof error === 'object' &&
       error !== null &&

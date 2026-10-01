@@ -11,8 +11,15 @@ export interface StorageUploadResult {
   url?: string;
 }
 
+export interface StorageReadResult {
+  body: Buffer;
+  contentType?: string;
+}
+
 export interface StorageService {
   upload(input: StorageUploadInput): Promise<StorageUploadResult>;
 
   delete(key: string): Promise<void>;
+
+  get(key: string): Promise<StorageReadResult>;
 }

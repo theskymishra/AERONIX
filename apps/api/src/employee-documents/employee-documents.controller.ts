@@ -6,10 +6,13 @@ import {
   Param,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+
+import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard.js';
@@ -84,6 +87,22 @@ export class EmployeeDocumentsController {
       employeeId,
       documentId,
     );
+  }
+  @Get(':documentId/download')
+  @RequirePermissions(PERMISSIONS.DOCUMENT_READ)
+  async download(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('employeeId') employeeId: string,
+    @Param('documentId') documentId: string,
+    @Res() response: Response,
+  ) {
+    const file = await this.employeeDocumentsService.download(
+      user.organizationId,
+      employeeId,
+      documentId,
+    );
+
+    response.type(file.contentType).attachment(file.fileName).send(file.body);
   }
 
   @Delete(':documentId')

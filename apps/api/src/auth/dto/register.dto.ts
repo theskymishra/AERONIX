@@ -35,8 +35,8 @@ export class RegisterDto {
   @MinLength(2)
   @MaxLength(80)
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-    message:
-      'slug must contain lowercase letters, numbers, and hyphens only',
-  })
+  message:
+    'slug must contain lowercase letters, numbers, and hyphens only',
+})
   organizationSlug!: string;
 }
