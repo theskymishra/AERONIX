@@ -47,6 +47,7 @@ export class CareerEvent {
   employeeId!: Types.ObjectId;
 
   @Prop({
+    type: String,
     required: true,
     enum: Object.values(CareerEventType),
     index: true,

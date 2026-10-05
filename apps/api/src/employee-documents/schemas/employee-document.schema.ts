@@ -49,6 +49,7 @@ export class EmployeeDocument {
   name!: string;
 
   @Prop({
+    type: String,
     required: true,
     enum: Object.values(EmployeeDocumentType),
     index: true,
@@ -91,6 +92,7 @@ export class EmployeeDocument {
   storageUrl?: string;
 
   @Prop({
+    type: String,
     required: true,
     enum: Object.values(EmployeeDocumentStatus),
     default: EmployeeDocumentStatus.ACTIVE,

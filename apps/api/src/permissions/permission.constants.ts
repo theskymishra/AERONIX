@@ -20,6 +20,7 @@ export const PERMISSIONS = {
   ATTENDANCE_MANAGE: 'attendance:manage',
 
   LEAVE_READ: 'leave:read',
+  LEAVE_VIEW_ALL: 'leave:view-all',
   LEAVE_CREATE: 'leave:create',
   LEAVE_APPROVE: 'leave:approve',
   LEAVE_MANAGE: 'leave:manage',

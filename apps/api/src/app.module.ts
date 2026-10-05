@@ -11,6 +11,11 @@ import { validateEnvironment } from './config/env.validation.js';
 import { EmployeesModule } from './employees/employees.module.js';
 import { CareerEventsModule } from './career-events/career-events.module.js';
 import { EmployeeDocumentsModule } from './employee-documents/employee-documents.module.js';
+import { AttendanceModule } from './attendance/attendance.module.js';
+import { LeaveTypesModule } from './leave-types/leave-types.module.js';
+import { LeaveRequestsModule } from './leave-requests/leave-requests.module.js';
+import { LeaveBalancesModule } from './leave-balances/leave-balances.module.js';
+import { AuditLogsModule } from './audit-logs/audit-logs.module.js';
 
 @Module({
   imports: [
@@ -35,6 +40,11 @@ import { EmployeeDocumentsModule } from './employee-documents/employee-documents
     EmployeesModule,
     CareerEventsModule,
     EmployeeDocumentsModule,
+    AttendanceModule,
+    LeaveTypesModule,
+    LeaveRequestsModule,
+    LeaveBalancesModule,
+    AuditLogsModule,
   ],
 
   controllers: [HealthController],
