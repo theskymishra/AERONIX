@@ -17,6 +17,8 @@ import { LeaveRequestsModule } from './leave-requests/leave-requests.module.js';
 import { LeaveBalancesModule } from './leave-balances/leave-balances.module.js';
 import { AuditLogsModule } from './audit-logs/audit-logs.module.js';
 import { PayrollModule } from './payroll/payroll.module.js';
+import { GoalsModule } from './goals/goals.module.js';
+import { PerformanceModule } from './performance/performance.module.js';
 
 @Module({
   imports: [
@@ -47,6 +49,8 @@ import { PayrollModule } from './payroll/payroll.module.js';
     LeaveBalancesModule,
     AuditLogsModule,
     PayrollModule,
+    GoalsModule,
+    PerformanceModule,
   ],
 
   controllers: [HealthController],

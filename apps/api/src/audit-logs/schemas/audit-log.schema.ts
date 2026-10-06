@@ -13,6 +13,8 @@ export enum AuditEntity {
   ATTENDANCE = 'ATTENDANCE',
   LEAVE_REQUEST = 'LEAVE_REQUEST',
   PAYROLL = 'PAYROLL',
+  GOAL = 'GOAL',
+  PERFORMANCE_REVIEW = 'PERFORMANCE_REVIEW',
 }
 
 export type AuditLogDocument = HydratedDocument<AuditLog>;
