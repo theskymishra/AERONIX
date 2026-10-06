@@ -80,7 +80,7 @@ describe('PayrollService', () => {
       );
 
       expect(result.status).toBe(PayrollStatus.PROCESSED);
-      expect(result.processedBy.toString()).toBe(user.userId);
+      expect(result.processedBy!.toString()).toBe(user.userId);
       expect(result.processedAt).toBeInstanceOf(Date);
       expect(record.save).toHaveBeenCalledOnce();
 
@@ -126,7 +126,7 @@ describe('PayrollService', () => {
       );
 
       expect(result.status).toBe(PayrollStatus.APPROVED);
-      expect(result.approvedBy.toString()).toBe(user.userId);
+      expect(result.approvedBy!.toString()).toBe(user.userId);
       expect(result.approvedAt).toBeInstanceOf(Date);
       expect(record.save).toHaveBeenCalledOnce();
 
@@ -172,7 +172,7 @@ describe('PayrollService', () => {
       );
 
       expect(result.status).toBe(PayrollStatus.PAID);
-      expect(result.paidBy.toString()).toBe(user.userId);
+      expect(result.paidBy!.toString()).toBe(user.userId);
       expect(result.paidAt).toBeInstanceOf(Date);
       expect(record.save).toHaveBeenCalledOnce();
 

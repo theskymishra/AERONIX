@@ -139,6 +139,9 @@ describe('PerformanceService', () => {
       _id: reviewId,
       reviewerId,
       status: PerformanceReviewStatus.DRAFT,
+      submittedAt: undefined as Date | undefined,
+      acknowledgedAt: undefined as Date | undefined,
+      completedAt: undefined as Date | undefined,
       save: vi.fn().mockImplementation(async () => review),
     };
 
@@ -193,6 +196,9 @@ describe('PerformanceService', () => {
       employeeId,
       reviewerId,
       status: PerformanceReviewStatus.SUBMITTED,
+      submittedAt: new Date(),
+      acknowledgedAt: undefined as Date | undefined,
+      completedAt: undefined as Date | undefined,
       save: vi.fn().mockImplementation(async () => review),
     };
 
@@ -258,6 +264,9 @@ describe('PerformanceService', () => {
       employeeId,
       reviewerId,
       status: PerformanceReviewStatus.ACKNOWLEDGED,
+      submittedAt: new Date(),
+      acknowledgedAt: new Date(),
+      completedAt: undefined as Date | undefined,
       save: vi.fn().mockImplementation(async () => review),
     };
 

@@ -19,6 +19,7 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module.js';
 import { PayrollModule } from './payroll/payroll.module.js';
 import { GoalsModule } from './goals/goals.module.js';
 import { PerformanceModule } from './performance/performance.module.js';
+import { RecruitmentModule } from './recruitment/recruitment.module.js';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { PerformanceModule } from './performance/performance.module.js';
     PayrollModule,
     GoalsModule,
     PerformanceModule,
+    RecruitmentModule,
   ],
 
   controllers: [HealthController],
