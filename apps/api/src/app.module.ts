@@ -16,6 +16,7 @@ import { LeaveTypesModule } from './leave-types/leave-types.module.js';
 import { LeaveRequestsModule } from './leave-requests/leave-requests.module.js';
 import { LeaveBalancesModule } from './leave-balances/leave-balances.module.js';
 import { AuditLogsModule } from './audit-logs/audit-logs.module.js';
+import { PayrollModule } from './payroll/payroll.module.js';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module.js';
     LeaveRequestsModule,
     LeaveBalancesModule,
     AuditLogsModule,
+    PayrollModule,
   ],
 
   controllers: [HealthController],

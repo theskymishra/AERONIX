@@ -26,6 +26,7 @@ export const PERMISSIONS = {
   LEAVE_MANAGE: 'leave:manage',
 
   PAYROLL_READ: 'payroll:read',
+  PAYROLL_SELF_READ: 'payroll:self-read',
   PAYROLL_MANAGE: 'payroll:manage',
 
   PERFORMANCE_READ: 'performance:read',
