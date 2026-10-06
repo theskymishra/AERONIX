@@ -16,6 +16,18 @@ import {
   JobOpeningSchema,
 } from './schemas/job-opening.schema.js';
 
+import { Application, ApplicationSchema } from './applications/schemas/application.schema.js';
+import { ApplicationsService } from './applications/applications.service.js';
+import { ApplicationsController } from './applications/applications.controller.js';
+
+import {
+  Candidate,
+  CandidateSchema,
+} from './candidates/schemas/candidate.schema.js';
+
+import { CandidatesService } from './candidates/candidates.service.js';
+import { CandidatesController } from './candidates/candidates.controller.js';
+
 @Module({
   imports: [
     AuthModule,
@@ -30,10 +42,18 @@ import {
         name: Employee.name,
         schema: EmployeeSchema,
       },
+      {
+        name: Candidate.name,
+        schema: CandidateSchema,
+      },
+      {
+        name: Application.name,
+        schema: ApplicationSchema,
+      },
     ]),
   ],
-  controllers: [JobOpeningsController],
-  providers: [JobOpeningsService],
-  exports: [JobOpeningsService],
+  controllers: [JobOpeningsController, CandidatesController, ApplicationsController],
+  providers: [JobOpeningsService, CandidatesService, ApplicationsService],
+  exports: [JobOpeningsService, CandidatesService, ApplicationsService],
 })
 export class RecruitmentModule {}

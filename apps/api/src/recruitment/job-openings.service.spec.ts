@@ -8,7 +8,9 @@ import {
 } from '../audit-logs/schemas/audit-log.schema.js';
 
 import {
+  EmploymentType,
   JobOpeningStatus,
+  WorkMode,
 } from './schemas/job-opening.schema.js';
 import { JobOpeningsService } from './job-openings.service.js';
 
@@ -55,8 +57,8 @@ describe('JobOpeningsService', () => {
     department: 'Engineering',
     team: 'Platform',
     hiringManagerId: employeeId,
-    employmentType: 'FULL_TIME',
-    workMode: 'HYBRID',
+    employmentType: EmploymentType.FULL_TIME,
+    workMode: WorkMode.HYBRID,
     location: 'Bengaluru',
     salaryMin: 1200000,
     salaryMax: 1800000,
@@ -189,13 +191,14 @@ describe('JobOpeningsService', () => {
       title: 'Senior Software Engineer',
       department: 'Engineering',
       team: 'Platform',
-      employmentType: 'FULL_TIME',
-      workMode: 'HYBRID',
+      employmentType: EmploymentType.FULL_TIME,
+      workMode: WorkMode.HYBRID,
       location: 'Bengaluru',
       salaryMin: 1200000,
       salaryMax: 1800000,
       requiredSkills: ['TypeScript'],
       status: JobOpeningStatus.DRAFT,
+      updatedBy: undefined as Types.ObjectId | undefined,
       save,
     };
 
@@ -242,6 +245,8 @@ describe('JobOpeningsService', () => {
     const jobOpening = {
       _id: new Types.ObjectId(jobId),
       status: JobOpeningStatus.DRAFT,
+      publishedAt: undefined as Date | undefined,
+      updatedBy: undefined as Types.ObjectId | undefined,
       save,
     };
 
@@ -280,6 +285,9 @@ describe('JobOpeningsService', () => {
     const jobOpening = {
       _id: new Types.ObjectId(jobId),
       status: JobOpeningStatus.PUBLISHED,
+      closedAt: undefined as Date | undefined,
+      closedBy: undefined as Types.ObjectId | undefined,
+      updatedBy: undefined as Types.ObjectId | undefined,
       save,
     };
 
@@ -319,6 +327,7 @@ describe('JobOpeningsService', () => {
     const jobOpening = {
       _id: new Types.ObjectId(jobId),
       status: JobOpeningStatus.DRAFT,
+      updatedBy: undefined as Types.ObjectId | undefined,
       save,
     };
 
@@ -345,6 +354,7 @@ describe('JobOpeningsService', () => {
     const jobOpening = {
       _id: new Types.ObjectId(jobId),
       status: JobOpeningStatus.PUBLISHED,
+      updatedBy: undefined as Types.ObjectId | undefined,
       save,
     };
 

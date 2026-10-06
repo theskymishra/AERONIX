@@ -16,6 +16,8 @@ export enum AuditEntity {
   GOAL = 'GOAL',
   PERFORMANCE_REVIEW = 'PERFORMANCE_REVIEW',
   JOB_OPENING = 'JOB_OPENING',
+  CANDIDATE = 'CANDIDATE',
+  APPLICATION = 'APPLICATION',
 }
 
 export type AuditLogDocument = HydratedDocument<AuditLog>;
