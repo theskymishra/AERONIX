@@ -3,10 +3,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthModule } from '../auth/auth.module.js';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module.js';
+
 import {
   Employee,
   EmployeeSchema,
 } from '../employees/schemas/employee.schema.js';
+
 import { RolesModule } from '../roles/roles.module.js';
 
 import { JobOpeningsController } from './job-openings.controller.js';
@@ -16,7 +18,10 @@ import {
   JobOpeningSchema,
 } from './schemas/job-opening.schema.js';
 
-import { Application, ApplicationSchema } from './applications/schemas/application.schema.js';
+import {
+  Application,
+  ApplicationSchema,
+} from './applications/schemas/application.schema.js';
 import { ApplicationsService } from './applications/applications.service.js';
 import { ApplicationsController } from './applications/applications.controller.js';
 
@@ -24,15 +29,22 @@ import {
   Candidate,
   CandidateSchema,
 } from './candidates/schemas/candidate.schema.js';
-
 import { CandidatesService } from './candidates/candidates.service.js';
 import { CandidatesController } from './candidates/candidates.controller.js';
+
+import {
+  Interview,
+  InterviewSchema,
+} from './interviews/schemas/interview.schema.js';
+import { InterviewsService } from './interviews/interviews.service.js';
+import { InterviewsController } from './interviews/interviews.controller.js';
 
 @Module({
   imports: [
     AuthModule,
     AuditLogsModule,
     RolesModule,
+
     MongooseModule.forFeature([
       {
         name: JobOpening.name,
@@ -50,10 +62,32 @@ import { CandidatesController } from './candidates/candidates.controller.js';
         name: Application.name,
         schema: ApplicationSchema,
       },
+      {
+        name: Interview.name,
+        schema: InterviewSchema,
+      },
     ]),
   ],
-  controllers: [JobOpeningsController, CandidatesController, ApplicationsController],
-  providers: [JobOpeningsService, CandidatesService, ApplicationsService],
-  exports: [JobOpeningsService, CandidatesService, ApplicationsService],
+
+  controllers: [
+    JobOpeningsController,
+    CandidatesController,
+    ApplicationsController,
+    InterviewsController,
+  ],
+
+  providers: [
+    JobOpeningsService,
+    CandidatesService,
+    ApplicationsService,
+    InterviewsService,
+  ],
+
+  exports: [
+    JobOpeningsService,
+    CandidatesService,
+    ApplicationsService,
+    InterviewsService,
+  ],
 })
 export class RecruitmentModule {}

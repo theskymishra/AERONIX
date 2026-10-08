@@ -18,6 +18,7 @@ export enum AuditEntity {
   JOB_OPENING = 'JOB_OPENING',
   CANDIDATE = 'CANDIDATE',
   APPLICATION = 'APPLICATION',
+  INTERVIEW = 'INTERVIEW',
 }
 
 export type AuditLogDocument = HydratedDocument<AuditLog>;
