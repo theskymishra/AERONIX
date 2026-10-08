@@ -32,6 +32,14 @@ pipeline {
                 sh 'npm run --workspace=web build'
             }
         }
+
+        stage('Maven Build and Test') {
+            steps {
+                dir('maven-demo') {
+                    sh 'mvn clean test'
+                }
+            }
+        }
     }
 
     post {

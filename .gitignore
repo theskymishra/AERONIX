@@ -40,3 +40,5 @@ coverage/
 # TypeScript build info
 *.tsbuildinfo
 apps/api/storage/
+
+target/
