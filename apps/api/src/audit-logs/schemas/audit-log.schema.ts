@@ -19,6 +19,8 @@ export enum AuditEntity {
   CANDIDATE = 'CANDIDATE',
   APPLICATION = 'APPLICATION',
   INTERVIEW = 'INTERVIEW',
+  ANNOUNCEMENT = 'ANNOUNCEMENT',
+  NOTIFICATION = 'NOTIFICATION',
 }
 
 export type AuditLogDocument = HydratedDocument<AuditLog>;

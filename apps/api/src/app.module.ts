@@ -20,6 +20,8 @@ import { PayrollModule } from './payroll/payroll.module.js';
 import { GoalsModule } from './goals/goals.module.js';
 import { PerformanceModule } from './performance/performance.module.js';
 import { RecruitmentModule } from './recruitment/recruitment.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
+import { AnnouncementsModule } from './announcements/announcements.module.js';
 
 @Module({
   imports: [
@@ -53,6 +55,8 @@ import { RecruitmentModule } from './recruitment/recruitment.module.js';
     GoalsModule,
     PerformanceModule,
     RecruitmentModule,
+    NotificationsModule,
+    AnnouncementsModule,
   ],
 
   controllers: [HealthController],
