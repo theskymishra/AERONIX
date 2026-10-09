@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopNavigation } from "@/components/layout/top-navigation";
+import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -33,19 +34,21 @@ export default function RootLayout({
     >
       <body className="min-h-full">
         <ThemeProvider>
-          <TooltipProvider>
-            <div className="flex min-h-screen">
-              <Sidebar />
+          <AuthProvider>
+            <TooltipProvider>
+              <div className="flex min-h-screen">
+                <Sidebar />
 
-              <div className="flex min-w-0 flex-1 flex-col">
-                <TopNavigation />
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <TopNavigation />
 
-                <main className="min-w-0 flex-1">
-                  {children}
-                </main>
+                  <main className="min-w-0 flex-1">
+                    {children}
+                  </main>
+                </div>
               </div>
-            </div>
-          </TooltipProvider>
+            </TooltipProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

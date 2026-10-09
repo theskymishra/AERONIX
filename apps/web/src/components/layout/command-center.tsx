@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
   Command,
@@ -10,59 +11,121 @@ import {
   CalendarDays,
   BarChart3,
   Settings,
-} from "lucide-react";
+  ClipboardCheck,
+  FileText,
+  Target,
+  UserCheck,
+  FileCheck2,
+  Megaphone,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
 
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
 const commands = [
   {
-    label: "Search employees",
-    description: "Find employees across AERONIX",
+    label: 'Search employees',
+    description: 'Find employees across AERONIX',
+    href: '/employees',
     icon: Users,
   },
   {
-    label: "Open organization",
-    description: "Explore your organization",
+    label: 'Open organization',
+    description: 'Explore your organization structure',
+    href: '/organization',
     icon: Building2,
   },
   {
-    label: "View attendance",
-    description: "Check attendance records",
+    label: 'View attendance',
+    description: 'Check attendance records and clock logs',
+    href: '/attendance',
     icon: CalendarDays,
   },
   {
-    label: "View performance",
-    description: "Review performance insights",
+    label: 'Manage leave',
+    description: 'Leave requests, balances, and approvals',
+    href: '/leave',
+    icon: ClipboardCheck,
+  },
+  {
+    label: 'Review payroll',
+    description: 'Cycles, salary payments, and slips',
+    href: '/payroll',
+    icon: FileText,
+  },
+  {
+    label: 'View performance',
+    description: 'Performance reviews and 360 insights',
+    href: '/performance',
     icon: BarChart3,
   },
   {
-    label: "Open settings",
-    description: "Manage AERONIX settings",
+    label: 'Track goals',
+    description: 'Company objectives and personal goals',
+    href: '/goals',
+    icon: Target,
+  },
+  {
+    label: 'Recruitment pipeline',
+    description: 'Job openings, candidates, and interviews',
+    href: '/recruitment',
+    icon: UserCheck,
+  },
+  {
+    label: 'Organization documents',
+    description: 'Policies, manuals, and forms',
+    href: '/documents',
+    icon: FileCheck2,
+  },
+  {
+    label: 'Announcements',
+    href: '/announcements',
+    description: 'Company broadcasts and bulletins',
+    icon: Megaphone,
+  },
+  {
+    label: 'Audit logs',
+    href: '/audit-logs',
+    description: 'Security and tenant activity timeline',
+    icon: ShieldCheck,
+  },
+  {
+    label: 'Workforce intelligence',
+    href: '/reports',
+    description: 'Executive analytics, trends, and exports',
+    icon: Sparkles,
+  },
+  {
+    label: 'Open settings',
+    href: '/settings',
+    description: 'Manage AERONIX configuration',
     icon: Settings,
   },
 ];
 
 export function CommandCenter() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
         setOpen((current) => !current);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -71,13 +134,19 @@ export function CommandCenter() {
     return searchText.includes(query.toLowerCase());
   });
 
+  const handleSelect = (href: string) => {
+    setOpen(false);
+    setQuery('');
+    router.push(href);
+  };
+
   return (
     <>
       <button
         type="button"
         aria-label="Open Command Center"
         onClick={() => setOpen(true)}
-        className="flex h-9 items-center gap-2 rounded-lg border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+        className="flex h-9 items-center gap-2 rounded-lg border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer"
       >
         <Search className="size-4" />
 
@@ -95,7 +164,7 @@ export function CommandCenter() {
           setOpen(nextOpen);
 
           if (!nextOpen) {
-            setQuery("");
+            setQuery('');
           }
         }}
       >
@@ -113,7 +182,7 @@ export function CommandCenter() {
               autoFocus
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search AERONIX..."
+              placeholder="Search AERONIX or jump to a module..."
               className="h-14 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
 
@@ -131,15 +200,16 @@ export function CommandCenter() {
                   <button
                     key={command.label}
                     type="button"
-                    className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-accent"
+                    onClick={() => handleSelect(command.href)}
+                    className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-accent cursor-pointer"
                   >
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted/50">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-muted/50">
                       <Icon className="size-4 text-muted-foreground" />
                     </div>
 
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium">{command.label}</p>
-                      <p className="truncate text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {command.description}
                       </p>
                     </div>
@@ -149,24 +219,10 @@ export function CommandCenter() {
                 );
               })
             ) : (
-              <div className="px-3 py-10 text-center">
-                <p className="text-sm font-medium">No results found</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Try a different search.
-                </p>
+              <div className="p-6 text-center text-sm text-muted-foreground">
+                No commands matching &ldquo;{query}&rdquo;
               </div>
             )}
-          </div>
-
-          <div className="border-t border-border px-4 py-3">
-            <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-              <Command className="size-3" />
-              <span>K</span>
-              <span className="ml-1">to open</span>
-              <span className="mx-1">•</span>
-              <span>ESC</span>
-              <span>to close</span>
-            </div>
           </div>
         </DialogContent>
       </Dialog>

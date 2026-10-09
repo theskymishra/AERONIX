@@ -1,0 +1,31 @@
+# Production Dockerfile for AERONIX HR API (NestJS)
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy root workspace configurations
+COPY package.json package-lock.json ./
+COPY packages ./packages
+COPY apps/api ./apps/api
+
+# Install dependencies and build
+RUN npm ci --workspace=@aeronix/database --workspace=@aeronix/types --workspace=@aeronix/config --workspace=api
+RUN npm run build --workspace=api
+
+# Production Runner
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+COPY package.json package-lock.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
+
+EXPOSE 3000
+
+CMD ["node", "apps/api/dist/main.js"]
