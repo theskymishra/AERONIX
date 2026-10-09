@@ -23,6 +23,7 @@ import { RecruitmentModule } from './recruitment/recruitment.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { AnnouncementsModule } from './announcements/announcements.module.js';
 import { OrganizationDocumentsModule } from './organization-documents/organization-documents.module.js';
+import { ReportsModule } from './reports/reports.module.js';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { OrganizationDocumentsModule } from './organization-documents/organizati
     NotificationsModule,
     AnnouncementsModule,
     OrganizationDocumentsModule,
+    ReportsModule,
   ],
 
   controllers: [HealthController],
