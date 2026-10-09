@@ -22,6 +22,7 @@ import { PerformanceModule } from './performance/performance.module.js';
 import { RecruitmentModule } from './recruitment/recruitment.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { AnnouncementsModule } from './announcements/announcements.module.js';
+import { OrganizationDocumentsModule } from './organization-documents/organization-documents.module.js';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { AnnouncementsModule } from './announcements/announcements.module.js';
     RecruitmentModule,
     NotificationsModule,
     AnnouncementsModule,
+    OrganizationDocumentsModule,
   ],
 
   controllers: [HealthController],
