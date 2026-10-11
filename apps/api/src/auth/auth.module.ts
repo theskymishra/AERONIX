@@ -16,6 +16,10 @@ import {
   RefreshSession,
   RefreshSessionSchema,
 } from './schemas/refresh-session.schema.js';
+import {
+  Role,
+  RoleSchema,
+} from '../roles/schemas/role.schema.js';
 
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy.js';
 
@@ -49,6 +53,10 @@ import { JwtAccessStrategy } from './strategies/jwt-access.strategy.js';
       {
         name: RefreshSession.name,
         schema: RefreshSessionSchema,
+      },
+      {
+        name: Role.name,
+        schema: RoleSchema,
       },
     ]),
   ],

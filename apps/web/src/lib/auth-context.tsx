@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const userData = await api.auth.me();
       setUser({
-        id: userData.userId || userData._id || userData.id,
+        id: userData.id || userData.userId || userData._id || '',
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const userData = await api.auth.me();
         if (isMounted) {
           setUser({
-            id: userData.id || userData._id,
+            id: userData.id || userData.userId || userData._id || '',
             email: userData.email,
             firstName: userData.firstName,
             lastName: userData.lastName,

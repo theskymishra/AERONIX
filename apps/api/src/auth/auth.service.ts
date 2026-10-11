@@ -15,6 +15,7 @@ import {
 } from 'mongoose';
 
 import { Organization } from '../organizations/schemas/organization.schema.js';
+import { Role } from '../roles/schemas/role.schema.js';
 import { User } from '../users/schemas/user.schema.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
@@ -31,6 +32,9 @@ export class AuthService {
 
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
+
+    @InjectModel(Role.name)
+    private readonly roleModel: Model<Role>,
 
     @InjectModel(RefreshSession.name)
     private readonly refreshSessionModel: Model<RefreshSession>,
@@ -460,6 +464,47 @@ export class AuthService {
       emailVerified: user.emailVerified,
       roleId: user.roleId?.toString(),
       lastLoginAt: user.lastLoginAt,
+    };
+  }
+
+  async getProfile(userId: string, organizationId: string) {
+    if (!Types.ObjectId.isValid(userId) || !Types.ObjectId.isValid(organizationId)) {
+      throw new UnauthorizedException('Invalid user credentials');
+    }
+
+    const user = await this.userModel
+      .findOne({
+        _id: new Types.ObjectId(userId),
+        organizationId: new Types.ObjectId(organizationId),
+      })
+      .lean();
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    let roleName = 'EMPLOYEE';
+    let permissions: string[] = [];
+
+    if (user.roleId) {
+      const role = await this.roleModel.findById(user.roleId).lean();
+      if (role) {
+        roleName = role.key || role.name;
+        permissions = (role.permissions as string[]) || [];
+      }
+    }
+
+    return {
+      id: user._id.toString(),
+      userId: user._id.toString(),
+      organizationId: user.organizationId.toString(),
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      status: user.status,
+      emailVerified: user.emailVerified,
+      role: roleName,
+      permissions,
     };
   }
 }

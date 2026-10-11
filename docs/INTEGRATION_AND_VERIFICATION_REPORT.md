@@ -86,3 +86,35 @@ cd apps/web
 npm run dev
 ```
 Navigate to `http://localhost:3000` or `http://localhost:3001`.
+
+---
+
+## 6. Authentication Gate & Global Theme Verification
+
+### Issue 1 — Authentication Gate
+- **Architecture:** Implemented `AppShell` (`apps/web/src/components/layout/app-shell.tsx`) and route classifier `auth-gate.ts` (`apps/web/src/lib/auth-gate.ts`).
+- **Gating Behavior:**
+  - Fresh browser visits with no active session redirect cleanly to `/login`.
+  - Unauthenticated visits to `/`, `/dashboard`, `/employees`, `/payroll`, `/reports`, `/settings`, etc. are blocked at the layout level without rendering `Sidebar` or `TopNavigation`.
+  - Branded loading gate prevents any flash of protected UI during session restoration.
+  - Authenticated visits to `/login` and `/register` automatically route forward to `/`.
+  - Session expiration or token invalidation clears local credentials and routes to `/login`.
+- **Automated Tests:** 6/6 test cases passing in `apps/web/src/lib/auth-gate.spec.ts`.
+
+### Issue 2 — Full Dark / Light Mode System
+- **Theme Switcher:** Added `ThemeToggle` (`apps/web/src/components/theme-toggle.tsx`) with instant 1-click toggling in the top header and public authentication pages.
+- **Surface Audit:** Converted hard-coded dark colors in `/login` and `/register` to semantic design tokens (`bg-card`, `text-card-foreground`, `border-border`, `bg-muted/40`, `text-foreground`).
+- **Dynamic Header:** `TopNavigation` reflects active section title dynamically.
+- **Persistence:** Uses `next-themes` with system preference detection and localStorage persistence, completely hydration-safe.
+- **Automated Tests:** 5/5 test cases passing in `apps/web/src/lib/theme.spec.ts`.
+
+### Issue 3 — Real Data Integration & User Identity
+- **Enriched Profile API:** `GET /api/v1/auth/me` now queries the user record and associated role to deliver real `role` and `permissions` via `AuthService.getProfile`.
+- **Live Metrics Dashboard:** `apps/web/src/app/page.tsx` wired to real reports, headcount, attendance, open positions, pending leaves, payroll, and audit log endpoints.
+- **Backend Tests:** 161/161 unit tests passing in `apps/api`.
+
+### Verification Commit Hash
+- **Commit:** `2e6759f`
+- **Subject:** `feat: implement authentication gate, global dark-light mode, and profile enrichment`
+
+

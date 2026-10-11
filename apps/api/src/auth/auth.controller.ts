@@ -49,9 +49,9 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAccessGuard)
   me(@CurrentUser() user: AuthenticatedUser) {
-    return {
-      userId: user.userId,
-      organizationId: user.organizationId,
-    };
+    return this.authService.getProfile(
+      user.userId,
+      user.organizationId,
+    );
   }
 }

@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
-import { Sidebar } from "@/components/layout/sidebar";
-import { TopNavigation } from "@/components/layout/top-navigation";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AppShell } from "@/components/layout/app-shell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +24,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: LayoutProps<"/">) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"
@@ -36,17 +37,7 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <TooltipProvider>
-              <div className="flex min-h-screen">
-                <Sidebar />
-
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <TopNavigation />
-
-                  <main className="min-w-0 flex-1">
-                    {children}
-                  </main>
-                </div>
-              </div>
+              <AppShell>{children}</AppShell>
             </TooltipProvider>
           </AuthProvider>
         </ThemeProvider>
