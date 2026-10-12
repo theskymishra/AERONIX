@@ -19,13 +19,32 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const slugify = (str: string) =>
+    str
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      await register(formData);
+      const generatedSlug = slugify(formData.organizationName);
+
+      if (!generatedSlug || generatedSlug.length < 2) {
+        throw new Error('Please enter a valid organization name.');
+      }
+
+      const payload = {
+        ...formData,
+        organizationSlug: generatedSlug,
+      };
+
+      await register(payload);
       router.push('/');
     } catch (err: any) {
       setError(err.message || 'Registration failed');

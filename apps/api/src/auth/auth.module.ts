@@ -20,6 +20,10 @@ import {
   Role,
   RoleSchema,
 } from '../roles/schemas/role.schema.js';
+import {
+  Employee,
+  EmployeeSchema,
+} from '../employees/schemas/employee.schema.js';
 
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy.js';
 
@@ -57,6 +61,10 @@ import { JwtAccessStrategy } from './strategies/jwt-access.strategy.js';
       {
         name: Role.name,
         schema: RoleSchema,
+      },
+      {
+        name: Employee.name,
+        schema: EmployeeSchema,
       },
     ]),
   ],

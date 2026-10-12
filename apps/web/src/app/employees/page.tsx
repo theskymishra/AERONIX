@@ -21,7 +21,7 @@ import { api } from '@/lib/api-client';
 import { useAuth } from '@/lib/auth-context';
 
 export default function EmployeesPage() {
-  const { hasPermission } = useAuth();
+  const { user } = useAuth();
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -38,9 +38,9 @@ export default function EmployeesPage() {
     workEmail: '',
     employeeCode: '',
     designation: '',
-    employmentStatus: 'ACTIVE',
     employmentType: 'FULL_TIME',
     workMode: 'HYBRID',
+    joiningDate: new Date().toISOString().split('T')[0],
   });
 
   const fetchEmployees = async () => {
@@ -80,7 +80,23 @@ export default function EmployeesPage() {
   const handleCreateEmployee = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.employees.create(newEmployee);
+      const payload: Record<string, any> = {
+        firstName: newEmployee.firstName.trim(),
+        lastName: newEmployee.lastName.trim(),
+        workEmail: newEmployee.workEmail.trim(),
+        employeeCode: newEmployee.employeeCode.trim(),
+        designation: newEmployee.designation.trim(),
+        employmentType: newEmployee.employmentType,
+        workMode: newEmployee.workMode,
+        joiningDate: new Date(newEmployee.joiningDate).toISOString(),
+      };
+
+      // Only attach userId if it exists and is a valid 24-character hexadecimal MongoDB ObjectId
+      if (user?.id && /^[0-9a-fA-F]{24}$/.test(user.id)) {
+        payload.userId = user.id;
+      }
+
+      await api.employees.create(payload);
       setAddModalOpen(false);
       setNewEmployee({
         firstName: '',
@@ -88,9 +104,9 @@ export default function EmployeesPage() {
         workEmail: '',
         employeeCode: '',
         designation: '',
-        employmentStatus: 'ACTIVE',
         employmentType: 'FULL_TIME',
         workMode: 'HYBRID',
+        joiningDate: new Date().toISOString().split('T')[0],
       });
       fetchEmployees();
     } catch (err: any) {
@@ -180,7 +196,7 @@ export default function EmployeesPage() {
                 employees.map((emp) => {
                   const empId = emp._id || emp.id;
                   const initials = `${emp.firstName?.[0] || ''}${emp.lastName?.[0] || ''}`.toUpperCase();
-                  const isActive = emp.employmentStatus === 'ACTIVE';
+                  const isActive = emp.employmentStatus === 'ACTIVE' || emp.status === 'ACTIVE';
 
                   return (
                     <tr
@@ -222,7 +238,7 @@ export default function EmployeesPage() {
                               : 'bg-zinc-500/10 text-zinc-400'
                           }`}
                         >
-                          {emp.employmentStatus}
+                          {emp.employmentStatus || emp.status || 'ACTIVE'}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -431,6 +447,17 @@ export default function EmployeesPage() {
                     <option value="ONSITE">Onsite</option>
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Joining Date</label>
+                <input
+                  type="date"
+                  required
+                  value={newEmployee.joiningDate}
+                  onChange={(e) => setNewEmployee({ ...newEmployee, joiningDate: e.target.value })}
+                  className="w-full mt-1 rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none"
+                />
               </div>
 
               <div className="flex justify-end gap-2 pt-3">

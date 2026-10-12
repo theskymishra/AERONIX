@@ -24,6 +24,7 @@ interface AuthContextType {
     firstName: string;
     lastName: string;
     organizationName: string;
+    organizationSlug: string;
   }) => Promise<void>;
   logout: () => Promise<void>;
   hasPermission: (permission: string) => boolean;
@@ -110,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     firstName: string;
     lastName: string;
     organizationName: string;
+    organizationSlug: string;
   }) => {
     const res = await api.auth.register(data);
     tokenStorage.setTokens(res.accessToken, res.refreshToken);
@@ -135,6 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const hasPermission = (permission: string) => {
     if (!user) return false;
     if (user.role === 'SUPER_ADMIN') return true;
+    if (user.permissions?.includes('*')) return true;
     return user.permissions?.includes(permission) ?? false;
   };
 

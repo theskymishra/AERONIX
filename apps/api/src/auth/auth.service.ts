@@ -17,12 +17,39 @@ import {
 import { Organization } from '../organizations/schemas/organization.schema.js';
 import { Role } from '../roles/schemas/role.schema.js';
 import { User } from '../users/schemas/user.schema.js';
+import { Employee } from '../employees/schemas/employee.schema.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { PasswordService } from './password.service.js';
 import { RefreshSession } from './schemas/refresh-session.schema.js';
 import { TokenService } from './token.service.js';
+
+const ALL_PERMISSIONS = [
+  'organization:read',
+  'organization:manage',
+  'user:read',
+  'user:manage',
+  'employee:read',
+  'employee:create',
+  'employee:update',
+  'employee:delete',
+  'leave:read',
+  'leave:manage',
+  'attendance:read',
+  'attendance:manage',
+  'payroll:read',
+  'payroll:manage',
+  'performance:read',
+  'performance:manage',
+  'recruitment:read',
+  'recruitment:manage',
+  'document:read',
+  'document:manage',
+  'announcement:read',
+  'announcement:manage',
+  'audit:read',
+] as const;
 
 @Injectable()
 export class AuthService {
@@ -35,6 +62,9 @@ export class AuthService {
 
     @InjectModel(Role.name)
     private readonly roleModel: Model<Role>,
+
+    @InjectModel(Employee.name)
+    private readonly employeeModel: Model<Employee>,
 
     @InjectModel(RefreshSession.name)
     private readonly refreshSessionModel: Model<RefreshSession>,
@@ -92,6 +122,30 @@ export class AuthService {
 
         organization = organizations[0];
 
+        let superAdminRole = await this.roleModel
+          .findOne({
+            organizationId: organization._id,
+            key: 'SUPER_ADMIN',
+          })
+          .session(session);
+
+        if (!superAdminRole) {
+          const roles = await this.roleModel.create(
+            [
+              {
+                organizationId: organization._id,
+                name: 'Super Admin',
+                key: 'SUPER_ADMIN',
+                slug: 'super-admin',
+                description: 'Full workspace administrative control',
+                permissions: ALL_PERMISSIONS as any,
+              },
+            ],
+            { session },
+          );
+          superAdminRole = roles[0];
+        }
+
         const users = await this.userModel.create(
           [
             {
@@ -100,6 +154,7 @@ export class AuthService {
               passwordHash,
               firstName: dto.firstName.trim(),
               lastName: dto.lastName.trim(),
+              roleId: superAdminRole._id,
               status: 'ACTIVE',
               emailVerified: false,
             },
@@ -108,6 +163,26 @@ export class AuthService {
         );
 
         user = users[0];
+
+        // Auto-provision an Employee document for the creator
+        await this.employeeModel.create(
+          [
+            {
+              organizationId: organization._id,
+              userId: user._id,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              workEmail: user.email,
+              employeeCode: 'EMP001',
+              designation: 'Workspace Administrator',
+              employmentType: 'FULL_TIME',
+              workMode: 'HYBRID',
+              employmentStatus: 'ACTIVE',
+              joiningDate: new Date(),
+            },
+          ],
+          { session },
+        );
       });
 
       const tokens = await this.issueTokens(
@@ -492,6 +567,10 @@ export class AuthService {
         roleName = role.key || role.name;
         permissions = (role.permissions as string[]) || [];
       }
+    }
+
+    if (roleName === 'SUPER_ADMIN' && permissions.length === 0) {
+      permissions = [...ALL_PERMISSIONS];
     }
 
     return {
