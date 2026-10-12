@@ -48,8 +48,8 @@ export default function AttendancePage() {
         api.employees.list({ limit: 100 }).catch(() => ({ items: [], total: 0 })),
       ]);
 
-      setRecords(attRes.items || []);
-      setEmployees(empRes.items || []);
+      setRecords(Array.isArray(attRes) ? attRes : attRes?.items || []);
+      setEmployees(Array.isArray(empRes) ? empRes : empRes?.items || []);
     } catch {
       // fallback
     } finally {
@@ -240,8 +240,10 @@ export default function AttendancePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {records.map((rec) => {
-                  const emp = employees.find((e) => (e._id || e.id) === rec.employeeId);
+                {(Array.isArray(records) ? records : []).map((rec) => {
+                  const emp = (Array.isArray(employees) ? employees : []).find(
+                    (e) => (e._id || e.id) === (rec.employeeId?._id || rec.employeeId),
+                  );
                   const empName = emp
                     ? `${emp.firstName} ${emp.lastName}`
                     : rec.employeeId?.firstName

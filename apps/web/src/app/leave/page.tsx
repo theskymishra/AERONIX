@@ -48,10 +48,10 @@ export default function LeavePage() {
         api.leave.getBalances().catch(() => []),
       ]);
 
-      setRequests(reqRes.items || []);
-      setTypes(typesRes || []);
-      setEmployees(empRes.items || []);
-      setBalances(Array.isArray(balRes) ? balRes : []);
+      setRequests(Array.isArray(reqRes) ? reqRes : reqRes?.items || []);
+      setTypes(Array.isArray(typesRes) ? typesRes : typesRes?.items || []);
+      setEmployees(Array.isArray(empRes) ? empRes : empRes?.items || []);
+      setBalances(Array.isArray(balRes) ? balRes : (balRes as any)?.employees || (balRes as any)?.items || []);
     } catch {
       // fallback
     } finally {
@@ -189,7 +189,9 @@ export default function LeavePage() {
             <span className="text-xs font-medium uppercase tracking-wider">Configured Types</span>
             <Umbrella className="size-4 text-purple-400" />
           </div>
-          <div className="mt-3 text-2xl font-bold text-purple-400">{types.length}</div>
+          <div className="mt-3 text-2xl font-bold text-purple-400">
+            {(Array.isArray(types) ? types : []).length}
+          </div>
           <p className="mt-1 text-xs text-muted-foreground">Policies in organization</p>
         </div>
       </div>
@@ -252,15 +254,19 @@ export default function LeavePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {requests.map((req) => {
-                  const emp = employees.find((e) => (e._id || e.id) === (req.employeeId?._id || req.employeeId));
+                {(Array.isArray(requests) ? requests : []).map((req) => {
+                  const emp = (Array.isArray(employees) ? employees : []).find(
+                    (e) => (e._id || e.id) === (req.employeeId?._id || req.employeeId),
+                  );
                   const empName = emp
                     ? `${emp.firstName} ${emp.lastName}`
                     : req.employeeId?.firstName
                     ? `${req.employeeId.firstName} ${req.employeeId.lastName}`
                     : 'Employee';
 
-                  const typeObj = types.find((t) => (t._id || t.id) === (req.leaveTypeId?._id || req.leaveTypeId));
+                  const typeObj = (Array.isArray(types) ? types : []).find(
+                    (t) => (t._id || t.id) === (req.leaveTypeId?._id || req.leaveTypeId),
+                  );
                   const typeName = typeObj?.name || req.leaveTypeId?.name || 'Leave';
 
                   return (
@@ -359,7 +365,7 @@ export default function LeavePage() {
                   className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="">Select policy...</option>
-                  {types.map((t) => (
+                  {(Array.isArray(types) ? types : []).map((t) => (
                     <option key={t._id || t.id} value={t._id || t.id}>
                       {t.name} ({t.code || t.category})
                     </option>

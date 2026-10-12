@@ -50,7 +50,7 @@ export default function EmployeesPage() {
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
       const data = await api.employees.list(params);
-      setEmployees(data.items || []);
+      setEmployees(Array.isArray(data) ? data : data?.items || []);
     } catch {
       // fallback
     } finally {
@@ -71,7 +71,7 @@ export default function EmployeesPage() {
         api.employees.getCareerTimeline(emp._id || emp.id),
       ]);
       setProfile360(p360);
-      setTimeline(tl || []);
+      setTimeline(Array.isArray(tl) ? tl : tl?.items || tl?.careerTimeline || []);
     } catch {
       // fallback
     }
@@ -304,13 +304,13 @@ export default function EmployeesPage() {
                 <span>Career Timeline & Events</span>
               </h3>
 
-              {timeline.length === 0 ? (
+              {(Array.isArray(timeline) ? timeline : []).length === 0 ? (
                 <div className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
                   No previous career events recorded.
                 </div>
               ) : (
                 <div className="space-y-3 border-l-2 border-border ml-2 pl-4">
-                  {timeline.map((evt, idx) => (
+                  {(Array.isArray(timeline) ? timeline : []).map((evt, idx) => (
                     <div key={idx} className="relative space-y-0.5">
                       <div className="absolute -left-[21px] top-1 size-2 rounded-full bg-primary" />
                       <div className="text-xs font-bold text-foreground">

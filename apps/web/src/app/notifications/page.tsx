@@ -23,7 +23,7 @@ export default function NotificationsPage() {
       if (filter === 'unread') params.read = false;
 
       const res = await api.notifications.list(params).catch(() => ({ items: [], pagination: {} }));
-      setNotifications(res.items || []);
+      setNotifications(Array.isArray(res) ? res : res?.items || []);
     } catch {
       // fallback
     } finally {
@@ -108,7 +108,7 @@ export default function NotificationsPage() {
           <div className="py-20 text-center text-sm text-muted-foreground">
             Loading notifications...
           </div>
-        ) : notifications.length === 0 ? (
+        ) : (Array.isArray(notifications) ? notifications : []).length === 0 ? (
           <div className="rounded-2xl border border-border bg-card py-20 text-center">
             <Inbox className="mx-auto size-10 text-muted-foreground/40 mb-3" />
             <h3 className="text-base font-semibold">Inbox is clear</h3>
@@ -117,7 +117,7 @@ export default function NotificationsPage() {
             </p>
           </div>
         ) : (
-          notifications.map((n) => (
+          (Array.isArray(notifications) ? notifications : []).map((n) => (
             <div
               key={n._id || n.id}
               className={`flex items-start justify-between gap-4 rounded-2xl border p-4 transition ${

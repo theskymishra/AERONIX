@@ -117,4 +117,39 @@ Navigate to `http://localhost:3000` or `http://localhost:3001`.
 - **Commit:** `2e6759f`
 - **Subject:** `feat: implement authentication gate, global dark-light mode, and profile enrichment`
 
+---
+
+## 7. Runtime Immunization & End-to-End Route/API Verification
+
+### Issue 1 — Resolution of `types.find is not a function` & Defensive Array Guards
+- **Root Cause:** Backend endpoints return `{ items: [...], pagination: { ... } }` or raw arrays depending on query pagination flags. When Next.js pages received paginated object envelopes or empty responses, standard array prototype methods (`.find()`, `.map()`, `.filter()`) threw `Uncaught TypeError: types.find is not a function`.
+- **API Client Normalization:** In `apps/web/src/lib/api-client.ts`, `api.leave.getTypes()` was normalized to `Array.isArray(res) ? res : res?.items || []`.
+- **System-Wide Defensive Array Protection:** Added `Array.isArray()` sanitizers and fallback handling across all portal modules:
+  - `/leave` (`types`, `requests`, `employees`, `balances`)
+  - `/attendance` (`records`, `employees`)
+  - `/payroll` (`records`, `employees`, `myRecords`)
+  - `/performance` (`reviews`, `employees`)
+  - `/goals` (`goals`, `employees`)
+  - `/recruitment` (`openings`, `candidates`, `applications`, `interviews`)
+  - `/employees` (`employees`, `timeline`)
+  - `/organization` (`employees`)
+  - `/documents` (`orgDocs`, `employees`, `empDocs`)
+  - `/announcements` (`announcements`)
+  - `/audit-logs` (`logs`)
+  - `/notifications` (`notifications`)
+
+### Issue 2 — Candidate Query DTO Integer Transformation Fix
+- **Root Cause:** `CandidateQueryDto` was missing `@Type(() => Number)` on its `page` and `limit` query parameters, causing NestJS `ValidationPipe` to reject requests with HTTP 400 (`limit must be an integer number`).
+- **Fix:** Added `@Type(() => Number)` to `page` and `limit` in `apps/api/src/recruitment/candidates/dto/candidate-query.dto.ts`.
+
+### Full Test & Verification Results
+- **Frontend Test Suite (`apps/web`):** 11 / 11 tests passed (100%).
+- **Frontend Production Build (`apps/web`):** 21 / 21 routes compiled and prerendered cleanly with Next.js 16.3.5 Turbopack.
+- **Frontend Linter (`apps/web`):** 0 errors.
+- **Backend Test Suite (`apps/api`):** 161 / 161 tests passed (100%).
+- **Backend Linter (`apps/api`):** 0 errors, 0 warnings across 172 files.
+- **Live HTTP GET Route Verification (Frontend):** 18 / 18 routes returned `HTTP 200 OK` (0 failures).
+- **Live HTTP API Verification (Backend):** 24 / 24 authenticated endpoints returned `HTTP 200 OK` (0 failures).
+
+
 

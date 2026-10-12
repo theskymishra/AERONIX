@@ -28,7 +28,7 @@ export default function OrganizationPage() {
         api.reports.getHeadcount().catch(() => null),
       ]);
 
-      setEmployees(empRes.items || []);
+      setEmployees(Array.isArray(empRes) ? empRes : empRes?.items || []);
       setHeadcount(hcRes);
     } catch {
       // fallback
@@ -42,14 +42,17 @@ export default function OrganizationPage() {
   }, []);
 
   // Compute departments dynamically from employees
+  const safeEmployees = Array.isArray(employees) ? employees : [];
   const departmentsMap: Record<string, any[]> = {};
-  employees.forEach((emp) => {
+  safeEmployees.forEach((emp) => {
     const dept = emp.department || 'General';
     if (!departmentsMap[dept]) departmentsMap[dept] = [];
     departmentsMap[dept].push(emp);
   });
 
-  const uniqueDesignations = Array.from(new Set(employees.map((e) => e.designation).filter(Boolean)));
+  const uniqueDesignations = Array.from(
+    new Set(safeEmployees.map((e) => e.designation).filter(Boolean)),
+  );
 
   return (
     <div className="space-y-8 p-6 lg:p-8">

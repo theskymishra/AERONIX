@@ -82,10 +82,10 @@ export default function RecruitmentPage() {
         api.recruitment.getInterviews().catch(() => ({ items: [], pagination: {} })),
       ]);
 
-      setOpenings(opRes.items || []);
-      setCandidates(canRes.items || []);
-      setApplications(appRes.items || []);
-      setInterviews(intRes.items || []);
+      setOpenings(Array.isArray(opRes) ? opRes : opRes?.items || []);
+      setCandidates(Array.isArray(canRes) ? canRes : canRes?.items || []);
+      setApplications(Array.isArray(appRes) ? appRes : appRes?.items || []);
+      setInterviews(Array.isArray(intRes) ? intRes : intRes?.items || []);
     } catch {
       // fallback
     } finally {
@@ -407,7 +407,7 @@ export default function RecruitmentPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y border-border">
-                  {openings.map((op) => (
+                  {(Array.isArray(openings) ? openings : []).map((op) => (
                     <tr key={op._id || op.id} className="hover:bg-muted/20">
                       <td className="px-6 py-4 font-semibold text-foreground">{op.title}</td>
                       <td className="px-6 py-4 text-xs">{op.department}</td>
@@ -476,7 +476,7 @@ export default function RecruitmentPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y border-border">
-                  {candidates.map((c) => (
+                  {(Array.isArray(candidates) ? candidates : []).map((c) => (
                     <tr key={c._id || c.id} className="hover:bg-muted/20">
                       <td className="px-6 py-4 font-semibold text-foreground">
                         {c.firstName} {c.lastName}
@@ -519,15 +519,15 @@ export default function RecruitmentPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y border-border">
-                  {applications.map((app) => {
-                    const candidateObj = candidates.find((c) => (c._id || c.id) === (app.candidateId?._id || app.candidateId));
+                  {(Array.isArray(applications) ? applications : []).map((app) => {
+                    const candidateObj = (Array.isArray(candidates) ? candidates : []).find((c) => (c._id || c.id) === (app.candidateId?._id || app.candidateId));
                     const candidateName = candidateObj
                       ? `${candidateObj.firstName} ${candidateObj.lastName}`
                       : app.candidateId?.firstName
                       ? `${app.candidateId.firstName} ${app.candidateId.lastName}`
                       : 'Candidate';
 
-                    const openingObj = openings.find((o) => (o._id || o.id) === (app.jobOpeningId?._id || app.jobOpeningId));
+                    const openingObj = (Array.isArray(openings) ? openings : []).find((o) => (o._id || o.id) === (app.jobOpeningId?._id || app.jobOpeningId));
                     const openingTitle = openingObj?.title || app.jobOpeningId?.title || 'Job Opening';
 
                     return (
@@ -625,7 +625,7 @@ export default function RecruitmentPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y border-border">
-                  {interviews.map((iv) => (
+                  {(Array.isArray(interviews) ? interviews : []).map((iv) => (
                     <tr key={iv._id || iv.id} className="hover:bg-muted/20">
                       <td className="px-6 py-4 font-semibold text-foreground">
                         <span className="rounded bg-muted px-2 py-0.5 text-xs mr-2 font-mono">
@@ -899,7 +899,7 @@ export default function RecruitmentPage() {
                   className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="">Select job position...</option>
-                  {openings.map((op) => (
+                  {(Array.isArray(openings) ? openings : []).map((op) => (
                     <option key={op._id || op.id} value={op._id || op.id}>
                       {op.title} ({op.department})
                     </option>
@@ -915,7 +915,7 @@ export default function RecruitmentPage() {
                   className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="">Select candidate...</option>
-                  {candidates.map((c) => (
+                  {(Array.isArray(candidates) ? candidates : []).map((c) => (
                     <option key={c._id || c.id} value={c._id || c.id}>
                       {c.firstName} {c.lastName} ({c.email})
                     </option>
@@ -974,7 +974,7 @@ export default function RecruitmentPage() {
                   className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="">Select candidate application...</option>
-                  {applications.map((app) => (
+                  {(Array.isArray(applications) ? applications : []).map((app) => (
                     <option key={app._id || app.id} value={app._id || app.id}>
                       App #{String(app._id || app.id).slice(-6)} - Stage: {app.status}
                     </option>

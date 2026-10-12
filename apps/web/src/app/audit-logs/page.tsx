@@ -35,7 +35,7 @@ export default function AuditLogsPage() {
       if (entityFilter) params.entity = entityFilter;
 
       const res = await api.auditLogs.list(params).catch(() => ({ items: [], total: 0, totalPages: 0 }));
-      setLogs(res.items || []);
+      setLogs(Array.isArray(res) ? res : res?.items || []);
       setTotal(res.total || 0);
     } catch {
       // fallback
@@ -145,7 +145,7 @@ export default function AuditLogsPage() {
           <div className="py-20 text-center text-sm text-muted-foreground">
             Streaming audit trail events...
           </div>
-        ) : logs.length === 0 ? (
+        ) : (Array.isArray(logs) ? logs : []).length === 0 ? (
           <div className="py-20 text-center">
             <ShieldCheck className="mx-auto size-10 text-muted-foreground/40 mb-3" />
             <h3 className="text-base font-semibold">No audit events found</h3>
@@ -168,7 +168,7 @@ export default function AuditLogsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y border-border">
-                {logs.map((log) => (
+                {(Array.isArray(logs) ? logs : []).map((log) => (
                   <tr key={log._id || log.id} className="hover:bg-muted/20 font-mono text-xs">
                     <td className="px-6 py-4 text-muted-foreground">
                       {new Date(log.createdAt).toLocaleString()}

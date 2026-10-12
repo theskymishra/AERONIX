@@ -223,7 +223,10 @@ export const api = {
 
   // Leave
   leave: {
-    getTypes: () => request<any[]>('/leave-types'),
+    getTypes: async () => {
+      const res = await request<any>('/leave-types');
+      return Array.isArray(res) ? res : res?.items || [];
+    },
     getRequests: (params?: Record<string, any>) => {
       const q = new URLSearchParams(params as any).toString();
       return request<{ items: any[]; total: number }>(

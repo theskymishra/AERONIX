@@ -44,8 +44,8 @@ export default function PerformancePage() {
         api.employees.list({ limit: 100 }).catch(() => ({ items: [], total: 0 })),
       ]);
 
-      setReviews(revRes.items || []);
-      setEmployees(empRes.items || []);
+      setReviews(Array.isArray(revRes) ? revRes : revRes?.items || []);
+      setEmployees(Array.isArray(empRes) ? empRes : empRes?.items || []);
     } catch {
       // fallback
     } finally {
@@ -242,8 +242,10 @@ export default function PerformancePage() {
                 </tr>
               </thead>
               <tbody className="divide-y border-border">
-                {reviews.map((rev) => {
-                  const emp = employees.find((e) => (e._id || e.id) === (rev.employeeId?._id || rev.employeeId));
+                {(Array.isArray(reviews) ? reviews : []).map((rev) => {
+                  const emp = (Array.isArray(employees) ? employees : []).find(
+                    (e) => (e._id || e.id) === (rev.employeeId?._id || rev.employeeId),
+                  );
                   const empName = emp
                     ? `${emp.firstName} ${emp.lastName}`
                     : rev.employeeId?.firstName
@@ -336,7 +338,7 @@ export default function PerformancePage() {
                   className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="">Choose employee...</option>
-                  {employees.map((emp) => (
+                  {(Array.isArray(employees) ? employees : []).map((emp) => (
                     <option key={emp._id || emp.id} value={emp._id || emp.id}>
                       {emp.firstName} {emp.lastName} ({emp.employeeCode || emp.workEmail})
                     </option>

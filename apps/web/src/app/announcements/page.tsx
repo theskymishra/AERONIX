@@ -36,7 +36,7 @@ export default function AnnouncementsPage() {
     try {
       setLoading(true);
       const res = await api.announcements.list().catch(() => ({ items: [], pagination: {} }));
-      setAnnouncements(res.items || []);
+      setAnnouncements(Array.isArray(res) ? res : res?.items || []);
     } catch {
       // fallback
     } finally {
@@ -151,7 +151,7 @@ export default function AnnouncementsPage() {
           <div className="col-span-full py-20 text-center text-sm text-muted-foreground">
             Loading announcements...
           </div>
-        ) : announcements.length === 0 ? (
+        ) : (Array.isArray(announcements) ? announcements : []).length === 0 ? (
           <div className="col-span-full py-20 text-center rounded-2xl border border-border bg-card">
             <Megaphone className="mx-auto size-10 text-muted-foreground/40 mb-3" />
             <h3 className="text-base font-semibold">No announcements published</h3>
@@ -160,7 +160,7 @@ export default function AnnouncementsPage() {
             </p>
           </div>
         ) : (
-          announcements.map((item) => (
+          (Array.isArray(announcements) ? announcements : []).map((item) => (
             <div
               key={item._id || item.id}
               className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-sm transition hover:border-primary/40"

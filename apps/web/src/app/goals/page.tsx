@@ -48,8 +48,8 @@ export default function GoalsPage() {
         api.employees.list({ limit: 100 }).catch(() => ({ items: [], total: 0 })),
       ]);
 
-      setGoals(goalsRes.items || []);
-      setEmployees(empRes.items || []);
+      setGoals(Array.isArray(goalsRes) ? goalsRes : goalsRes?.items || []);
+      setEmployees(Array.isArray(empRes) ? empRes : empRes?.items || []);
     } catch {
       // fallback
     } finally {
@@ -261,8 +261,10 @@ export default function GoalsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y border-border">
-                {goals.map((g) => {
-                  const emp = employees.find((e) => (e._id || e.id) === (g.employeeId?._id || g.employeeId));
+                {(Array.isArray(goals) ? goals : []).map((g) => {
+                  const emp = (Array.isArray(employees) ? employees : []).find(
+                    (e) => (e._id || e.id) === (g.employeeId?._id || g.employeeId),
+                  );
                   const empName = emp
                     ? `${emp.firstName} ${emp.lastName}`
                     : g.employeeId?.firstName
@@ -360,7 +362,7 @@ export default function GoalsPage() {
                   className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="">Select team member...</option>
-                  {employees.map((emp) => (
+                  {(Array.isArray(employees) ? employees : []).map((emp) => (
                     <option key={emp._id || emp.id} value={emp._id || emp.id}>
                       {emp.firstName} {emp.lastName} ({emp.employeeCode || emp.workEmail})
                     </option>

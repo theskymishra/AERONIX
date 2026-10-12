@@ -51,9 +51,9 @@ export default function PayrollPage() {
         api.payroll.getMine().catch(() => ({ items: [], total: 0 })),
       ]);
 
-      setRecords(payrollRes.items || []);
-      setEmployees(empRes.items || []);
-      setMyRecords(mineRes.items || []);
+      setRecords(Array.isArray(payrollRes) ? payrollRes : payrollRes?.items || []);
+      setEmployees(Array.isArray(empRes) ? empRes : empRes?.items || []);
+      setMyRecords(Array.isArray(mineRes) ? mineRes : mineRes?.items || []);
     } catch {
       // fallback
     } finally {
@@ -285,8 +285,10 @@ export default function PayrollPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {records.map((rec) => {
-                      const emp = employees.find((e) => (e._id || e.id) === (rec.employeeId?._id || rec.employeeId));
+                    {(Array.isArray(records) ? records : []).map((rec) => {
+                      const emp = (Array.isArray(employees) ? employees : []).find(
+                        (e) => (e._id || e.id) === (rec.employeeId?._id || rec.employeeId),
+                      );
                       const empName = emp
                         ? `${emp.firstName} ${emp.lastName}`
                         : rec.employeeId?.firstName
@@ -364,7 +366,7 @@ export default function PayrollPage() {
       ) : (
         /* My Payslips */
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          {myRecords.length === 0 ? (
+          {(Array.isArray(myRecords) ? myRecords : []).length === 0 ? (
             <div className="py-20 text-center">
               <FileText className="mx-auto size-10 text-muted-foreground/40 mb-3" />
               <h3 className="text-base font-semibold">No personal payslips available</h3>
@@ -385,7 +387,7 @@ export default function PayrollPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {myRecords.map((rec) => (
+                  {(Array.isArray(myRecords) ? myRecords : []).map((rec) => (
                     <tr key={rec._id || rec.id} className="hover:bg-muted/20">
                       <td className="px-6 py-4 font-mono font-medium">
                         {rec.periodMonth}/{rec.periodYear}
@@ -433,7 +435,7 @@ export default function PayrollPage() {
                   className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="">Choose employee...</option>
-                  {employees.map((emp) => (
+                  {(Array.isArray(employees) ? employees : []).map((emp) => (
                     <option key={emp._id || emp.id} value={emp._id || emp.id}>
                       {emp.firstName} {emp.lastName} ({emp.employeeCode || emp.workEmail})
                     </option>

@@ -52,7 +52,7 @@ export default function DocumentsPage() {
       const params: any = {};
       if (categoryFilter) params.category = categoryFilter;
       const res = await api.documents.listOrg(params).catch(() => ({ items: [], pagination: {} }));
-      setOrgDocs(res.items || []);
+      setOrgDocs(Array.isArray(res) ? res : res?.items || []);
     } catch {
       // fallback
     } finally {
@@ -63,9 +63,10 @@ export default function DocumentsPage() {
   const fetchEmployees = async () => {
     try {
       const res = await api.employees.list({ limit: 100 }).catch(() => ({ items: [], total: 0 }));
-      setEmployees(res.items || []);
-      if (res.items?.[0] && !selectedEmpId) {
-        setSelectedEmpId(res.items[0]._id || res.items[0].id);
+      const empItems = Array.isArray(res) ? res : res?.items || [];
+      setEmployees(empItems);
+      if (empItems[0] && !selectedEmpId) {
+        setSelectedEmpId(empItems[0]._id || empItems[0].id);
       }
     } catch {
       // fallback
@@ -76,7 +77,7 @@ export default function DocumentsPage() {
     if (!empId) return;
     try {
       const res = await api.documents.listEmployee(empId).catch(() => ({ items: [], total: 0 }));
-      setEmpDocs(res.items || []);
+      setEmpDocs(Array.isArray(res) ? res : res?.items || []);
     } catch {
       // fallback
     }
@@ -266,7 +267,7 @@ export default function DocumentsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y border-border">
-                    {orgDocs.map((doc) => (
+                    {(Array.isArray(orgDocs) ? orgDocs : []).map((doc) => (
                       <tr key={doc._id || doc.id} className="hover:bg-muted/20">
                         <td className="px-6 py-4">
                           <div className="font-semibold text-foreground">{doc.title}</div>
@@ -328,7 +329,7 @@ export default function DocumentsPage() {
               onChange={(e) => setSelectedEmpId(e.target.value)}
               className="rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary max-w-md"
             >
-              {employees.map((emp) => (
+              {(Array.isArray(employees) ? employees : []).map((emp) => (
                 <option key={emp._id || emp.id} value={emp._id || emp.id}>
                   {emp.firstName} {emp.lastName} ({emp.employeeCode || emp.workEmail})
                 </option>
@@ -337,7 +338,7 @@ export default function DocumentsPage() {
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-border bg-card">
-            {empDocs.length === 0 ? (
+            {(Array.isArray(empDocs) ? empDocs : []).length === 0 ? (
               <div className="py-20 text-center">
                 <FileText className="mx-auto size-10 text-muted-foreground/40 mb-3" />
                 <h3 className="text-base font-semibold">No personal documents attached</h3>
@@ -358,7 +359,7 @@ export default function DocumentsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y border-border">
-                    {empDocs.map((doc) => (
+                    {(Array.isArray(empDocs) ? empDocs : []).map((doc) => (
                       <tr key={doc._id || doc.id} className="hover:bg-muted/20">
                         <td className="px-6 py-4 font-semibold text-foreground">{doc.name}</td>
                         <td className="px-6 py-4">
