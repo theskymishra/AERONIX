@@ -5,11 +5,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class AppTest {
-
-    // =========================================================
-    // 10 SUCCESS / POSITIVE TEST CASES
-    // =========================================================
-
     @Test
     public void testValidEmployeeEmail() {
         App app = new App();
@@ -105,11 +100,6 @@ public class AppTest {
                 app.isCandidateEligible(3, 2)
         );
     }
-
-
-    // =========================================================
-    // 5 FAILURE / NEGATIVE SCENARIO TEST CASES
-    // =========================================================
 
     @Test
     public void testInvalidEmployeeEmail() {
